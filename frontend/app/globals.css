@@ -38,24 +38,25 @@
 
 :root {
   --background: #000000;
-  --foreground: #f8fafc;
+  --foreground: #f9f8fc;
   --card: rgba(255, 255, 255, 0.02);
-  --card-foreground: #f8fafc;
+  --card-foreground: #f9f8fc;
   --popover: #0d0e11;
+  --hero-gradient:radial-gradient(125% 125% at 50% 90%, #000000 40%, rgba(56, 21, 131, 0.549) 90%);
   --popover-foreground: #f8fafc;
   --primary: #482594;
   --primary-foreground: #ffffff;
-  --secondary: rgba(99, 102, 241, 0.08);
-  --secondary-foreground: #7d65d3;
+  --secondary: rgba(37, 99, 235, 0.08);
+  --secondary-foreground: #9d88c9;
   --muted: rgba(255, 255, 255, 0.04);
   --muted-foreground: #94a3b8;
-  --accent: rgba(99, 102, 241, 0.12);
-  --accent-foreground: #a5b4fc;
+  --accent: rgba(37, 99, 235, 0.12);
+  --accent-foreground: #d4b9e9;
   --destructive: #f43f5e;
   --border: rgba(255, 255, 255, 0.06);
   --input: rgba(255, 255, 255, 0.06);
-  --ring: rgba(99, 102, 241, 0.4);
-  --radius: 0.75rem;
+  --ring: rgba(93, 37, 235, 0.4);
+  --radius: 1rem;
   --content: #ffffff;
   --content-rgb: 255, 255, 255;
   --content-800: rgba(0, 0, 0, 0.8);
@@ -65,28 +66,29 @@
 }
 
 :root[data-theme="light"] {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: rgba(0, 0, 0, 0.02);
-  --card-foreground: #0f172a;
+  --background: #ffffff;
+  --foreground: #190f2a;
+  --card: #ffffff;
+  --card-foreground: #140f2a;
   --popover: #ffffff;
+  --hero-gradient:radial-gradient(125% 125% at 50% 90%, #ffffff 40%, rgba(142, 131, 223, 0.688) 90%);
   --popover-foreground: #0f172a;
   --primary: #482594;
   --primary-foreground: #ffffff;
-  --secondary: rgba(79, 70, 229, 0.06);
+  --secondary: #f1f5f9;
   --secondary-foreground: #482594;
-  --muted: rgba(0, 0, 0, 0.04);
+  --muted: #f8fafc;
   --muted-foreground: #64748b;
-  --accent: rgba(79, 70, 229, 0.1);
+  --accent: #f1f5f9;
   --accent-foreground: #482594;
-  --destructive: #e11d48;
-  --border: rgba(0, 0, 0, 0.08);
-  --input: rgba(0, 0, 0, 0.06);
-  --ring: rgba(79, 70, 229, 0.3);
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --input: #f1f5f9;
+  --ring: rgba(80, 37, 235, 0.2);
   --content: #000000;
   --content-rgb: 0, 0, 0;
   --content-800: rgb(255, 255, 255);
-  --sidebar-bg: #f1f5f9;
+  --sidebar-bg: #f8fafc;
   --cta-bg: #482594;
   --cta-fg: #ffffff;
 }
@@ -339,9 +341,9 @@ input[type="range"]::-moz-range-thumb {
 /* AI Assistant Dynamic Animations */
 .dynamic-placeholder::placeholder {
   background: linear-gradient(90deg,
-      rgba(var(--content-rgb), 0.2) 0%,
-      rgba(var(--content-rgb), 0.8) 50%,
-      rgba(var(--content-rgb), 0.2) 100%) !important;
+      var(--cta-bg) 0%,
+      rgba(var(--content-rgb), 0.7) 50%,
+      var(--cta-bg) 100%) !important;
   background-size: 200% auto !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
@@ -351,12 +353,12 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .dynamic-send-button {
-  background: linear-gradient(45deg,
+  background: linear-gradient(90deg,
       var(--cta-bg) 0%,
       rgba(var(--content-rgb), 0.7) 50%,
       var(--cta-bg) 100%) !important;
-  background-size: 200% 200% !important;
-  animation: gradientShift 4s ease infinite !important;
+  background-size: 200% auto !important;
+  animation: shimmer 3s linear infinite !important;
 }
 
 .dynamic-send-button:disabled {

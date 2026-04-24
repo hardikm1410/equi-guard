@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-context";
-import { Shield, Mail, Lock, User, ArrowRight, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Shield, Mail, Lock, User, ArrowLeft, ArrowRight, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { Suspense } from "react";
 
@@ -79,6 +79,12 @@ function LoginForm() {
 
   return (
     <main className="relative min-h-screen flex bg-background overflow-hidden">
+      {/* Back Button */}
+      <Link href="/" className="absolute top-6 right-6 lg:top-8 lg:right-8 z-50 flex items-center gap-2 text-sm font-medium text-content/60 hover:text-content bg-background/50 hover:bg-content/5 px-4 py-2 rounded-full backdrop-blur-md transition-all border border-content/5 hover:scale-105">
+        <ArrowLeft className="w-4 h-4" />
+        Back to Home
+      </Link>
+
       {/* Background effects */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full opacity-20 blur-[150px]" style={{ background: `radial-gradient(circle, rgba(${cr},0.12) 0%, transparent 70%)` }} />

@@ -21,15 +21,15 @@ function MobileNav() {
   return (
     <div className="md:hidden">
       {/* Top Navbar */}
-      <div className="fixed top-0 left-0 right-0 h-16 border-b border-content/[0.06] bg-sidebar/80 backdrop-blur-xl z-50 flex items-center justify-between px-4">
+      <div className="fixed top-0 left-0 right-0 h-20 border-b border-content/[0.05] bg-sidebar/80 backdrop-blur-xl z-50 flex items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-cta flex items-center justify-center shrink-0">
-            <Shield className="w-4 h-4 text-cta-foreground" />
+          <div className="w-10 h-10 rounded-2xl bg-cta flex items-center justify-center shrink-0 shadow-lg shadow-cta/20">
+            <Shield className="w-5 h-5 text-cta-foreground" />
           </div>
-          <span className="text-sm font-semibold tracking-tight text-content">EquiGuard AI</span>
+          <span className="text-xl font-bold tracking-tight text-content">EquiGuard</span>
         </Link>
         <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-content/70 hover:text-content">
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {isOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
         </button>
       </div>
 
@@ -85,9 +85,6 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       <div
         className={`flex-1 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] w-full ${expanded ? 'md:ml-[240px]' : 'md:ml-[68px]'} ml-0`}
       >
-        <div className="pointer-events-none fixed top-0 right-0 w-[500px] h-[500px] opacity-[0.04] blur-[120px] z-0"
-          style={{ background: `radial-gradient(circle, rgba(var(--content-rgb),0.3) 0%, transparent 70%)` }}
-        />
         <div className="relative z-10 p-4 md:p-8 pt-20 md:pt-8">
           {children}
         </div>

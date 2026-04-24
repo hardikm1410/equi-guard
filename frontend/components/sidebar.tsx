@@ -57,18 +57,18 @@ export function Sidebar() {
       )}
     >
       {/* Logo / Brand */}
-      <div className="flex items-center px-4 h-16 border-b border-content/[0.06] shrink-0">
+      <div className="flex items-center px-3 h-20 border-b border-content/[0.05] shrink-0">
         <Link href="/" className="flex items-center gap-2.5 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-cta flex items-center justify-center shrink-0">
-            <Shield className="w-4 h-4 text-cta-foreground" />
+          <div className="w-10 h-10 rounded-2xl bg-cta flex items-center justify-center shrink-0 shadow-lg shadow-cta/20">
+            <Shield className="w-5 h-5 text-cta-foreground" />
           </div>
           <span
             className={cn(
-              "text-sm font-semibold tracking-tight text-content whitespace-nowrap transition-all duration-300",
+              "text-lg font-bold tracking-tight text-content whitespace-nowrap transition-all duration-300",
               expanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 pointer-events-none w-0"
             )}
           >
-            EquiGuard AI
+            EquiGuard
           </span>
         </Link>
       </div>
@@ -139,7 +139,7 @@ export function Sidebar() {
 
       {/* User profile */}
       <div className="border-t border-content/[0.06] p-3 shrink-0">
-        <div className="flex items-center justify-between gap-3 px-2">
+        <div className="flex items-center justify-between gap-3 px-1">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-full bg-cta flex items-center justify-center text-cta-foreground text-xs font-bold shrink-0">
               {user?.displayName?.[0] || user?.email?.[0] || "U"}
