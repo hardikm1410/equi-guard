@@ -139,7 +139,7 @@ export default function LandingPage() {
                 {/* Background decorative blob */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/20 blur-[100px] rounded-full pointer-events-none"></div>
 
-                <div className="glass-card rounded-2xl p-1 max-w-2xl mx-auto relative z-10 shadow-2xl shadow-black/20 transform lg:scale-90 hover:scale-105 lg:hover:scale-95 transition-all duration-700 cursor-pointer group">
+                <div className="glass-card rounded-2xl p-1 max-w-2xl mx-auto relative z-10 shadow-2xl shadow-black/10 transform lg:scale-90 hover:scale-105 lg:hover:scale-95 transition-all duration-700 cursor-pointer group">
                   <div className="rounded-xl bg-background border border-content/[0.08] p-6 sm:p-8 backdrop-blur-sm">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="flex gap-1.5"><div className="w-3 h-3 rounded-full bg-content/[0.08]" /><div className="w-3 h-3 rounded-full bg-content/[0.08]" /><div className="w-3 h-3 rounded-full bg-content/[0.08]" /></div>
@@ -165,7 +165,7 @@ export default function LandingPage() {
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-content mb-8 leading-[1.05] animate-fade-in-up">Fair Decisions<br /><span className="text-primary">With Unbiased AI</span></h1>
                 <p className="text-lg sm:text-xl text-content/60 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-12 animate-fade-in-up font-medium" style={{ animationDelay: "100ms" }}>EquiGuard detects and eliminates bias in automated systems. We ensure every decision is based on merit, not flawed data.</p>
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-                  <Link href="/login?mode=signup" className="group inline-flex items-center gap-2.5 bg-cta text-cta-foreground font-bold text-md px-8 py-4 rounded-2xl transition-all duration-300 shadow-2xl shadow-cta/30 hover:-translate-y-1 hover:shadow-cta/40">Start Fairness Audit<ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" /></Link>
+                  <Link href="/login?mode=signup" className="group inline-flex items-center gap-2.5 bg-cta text-cta-foreground font-bold text-md px-8 py-4 rounded-2xl transition-all duration-300 shadow-2xl shadow-cta/0 hover:-translate-y-1 hover:shadow-cta/10">Start Fairness Audit<ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" /></Link>
                 </div>
               </div>
 

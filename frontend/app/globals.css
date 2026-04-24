@@ -42,7 +42,7 @@
   --card: rgba(255, 255, 255, 0.02);
   --card-foreground: #f9f8fc;
   --popover: #0d0e11;
-  --hero-gradient:radial-gradient(125% 125% at 50% 90%, #000000 40%, rgba(56, 21, 131, 0.549) 90%);
+  --hero-gradient: radial-gradient(125% 125% at 50% 90%, #000000 40%, rgba(56, 21, 131, 0.400) 90%);
   --popover-foreground: #f8fafc;
   --primary: #482594;
   --primary-foreground: #ffffff;
@@ -71,7 +71,7 @@
   --card: #ffffff;
   --card-foreground: #140f2a;
   --popover: #ffffff;
-  --hero-gradient:radial-gradient(125% 125% at 50% 90%, #ffffff 40%, rgba(142, 131, 223, 0.688) 90%);
+  --hero-gradient: radial-gradient(125% 125% at 50% 90%, #ffffff 40%, rgba(142, 131, 223, 0.688) 90%);
   --popover-foreground: #0f172a;
   --primary: #482594;
   --primary-foreground: #ffffff;
@@ -178,13 +178,17 @@
   }
 }
 
-@keyframes gradientMove {
+@keyframes gradientShift {
   0% {
     background-position: 0% 50%;
   }
 
-  100% {
+  50% {
     background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
   }
 }
 
@@ -336,29 +340,25 @@ input[type="range"]::-moz-range-thumb {
 
 /* AI Assistant Dynamic Animations */
 .dynamic-placeholder::placeholder {
-  background: linear-gradient(to right,
-      var(--cta-bg) 0%,
-      rgba(var(--content-rgb), 0.7) 25%,
-      var(--cta-bg) 50%,
-      rgba(var(--content-rgb), 0.7) 75%,
-      var(--cta-bg) 100%) !important;
+  background: linear-gradient(90deg,
+      rgba(var(--content-rgb), 0.2) 0%,
+      rgba(var(--content-rgb), 0.8) 50%,
+      rgba(var(--content-rgb), 0.2) 100%) !important;
   background-size: 200% auto !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   color: transparent !important;
-  animation: gradientMove 3s linear infinite !important;
+  animation: shimmer 3s linear infinite !important;
 }
 
 .dynamic-send-button {
-  background: linear-gradient(to right,
+  background: linear-gradient(45deg,
       var(--cta-bg) 0%,
-      rgba(var(--content-rgb), 0.7) 25%,
-      var(--cta-bg) 50%,
-      rgba(var(--content-rgb), 0.7) 75%,
+      rgba(var(--content-rgb), 0.7) 50%,
       var(--cta-bg) 100%) !important;
-  background-size: 200% auto !important;
-  animation: gradientMove 3s linear infinite !important;
+  background-size: 200% 200% !important;
+  animation: gradientShift 4s ease infinite !important;
 }
 
 .dynamic-send-button:disabled {
