@@ -3,10 +3,13 @@
 import { PageHeader } from "@/components/page-components";
 import { Upload as UploadIcon, FileText, Columns, HardDrive, Lightbulb, ArrowRight, Check, CloudUpload, ChevronDown } from "lucide-react";
 import { useState } from "react";
-
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Loader2 } from "lucide-react";
 import AppTour from "@/components/AppTour";
 import { UPLOAD_STEPS } from "@/lib/tour-steps";
+import { useAuth } from "@/components/auth-context";
+import { API_URL, DEMO_USER_EMAIL } from "@/lib/constants";
+import { useRouter } from "next/navigation";
+
 
 const aboutItems = [
   { icon: FileText, label: "Rows", value: "—" }, { icon: Columns, label: "Columns", value: "—" },
@@ -21,6 +24,36 @@ export default function UploadPage() {
   const [protectedAttr, setProtectedAttr] = useState("");
   const [prediction, setPrediction] = useState("");
   const [tourRun, setTourRun] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const router = useRouter();
+  const { user } = useAuth();
+  const isDemo = user?.email === DEMO_USER_EMAIL;
+
+  const handleAnalyze = async () => {
+    if (!uploaded || !targetVar || !protectedAttr) return;
+    
+    setAnalyzing(true);
+    
+    try {
+      if (isDemo) {
+        // Simulate local analysis for demo
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } else {
+        // Real backend call
+        const response = await fetch(`${API_URL}/evaluate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resume_text: "file_uploaded" }) // In real case, we'd send the file content
+        });
+        if (!response.ok) throw new Error("Analysis failed");
+      }
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Analysis failed:", error);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -32,10 +65,10 @@ export default function UploadPage() {
           action={
             <button 
               onClick={() => setTourRun(true)}
-              className="group p-3 rounded-2xl bg-content/[0.04] border border-content/[0.08] hover:bg-content/[0.08] transition-all hover:border-cta/30"
+              className="group p-2 rounded-2xl bg-content/[0.04] border border-content/[0.08] hover:bg-content/[0.08] transition-all hover:border-cta/30"
               title="Start Tour"
             >
-              <HelpCircle className="w-6 h-6 text-content/40 group-hover:text-cta transition-colors" />
+              <HelpCircle className="w-5 h-5 text-content/40 group-hover:text-cta transition-colors" />
             </button>
           }
         />
@@ -97,7 +130,17 @@ export default function UploadPage() {
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content/30 pointer-events-none" />
                 </div>
               </div>
-              <button className="w-full inline-flex items-center justify-center gap-2 bg-cta text-cta-foreground text-md font-semibold px-5 py-3 rounded-xl transition-all hover:bg-cta/90 shadow-lg shadow-content/[0.05] mt-2">Analyze & Detect Bias<ArrowRight className="w-4 h-4" /></button>
+              <button 
+                onClick={handleAnalyze}
+                disabled={analyzing || !uploaded || !targetVar || !protectedAttr}
+                className="w-full inline-flex items-center justify-center gap-2 bg-cta text-cta-foreground text-md font-semibold px-5 py-3 rounded-xl transition-all hover:bg-cta/90 shadow-lg shadow-content/[0.05] mt-2 disabled:opacity-50"
+              >
+                {analyzing ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" />Analyzing...</>
+                ) : (
+                  <>Analyze & Detect Bias<ArrowRight className="w-4 h-4" /></>
+                )}
+              </button>
             </div>
           </div>
           <div className="glass-card rounded-xl p-5">

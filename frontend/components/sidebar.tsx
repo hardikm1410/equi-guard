@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useSidebar } from "./sidebar-context";
 import { useAuth } from "@/components/auth-context";
 import { useTheme } from "./theme-provider";
+import { DEMO_USER_EMAIL, API_URL } from "@/lib/constants";
 
 export const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -32,6 +33,7 @@ export function Sidebar() {
   const { expanded, setExpanded } = useSidebar();
   const { user, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
+    const isDemo = user?.email === DEMO_USER_EMAIL;
 
   const handleMouseEnter = useCallback(() => {
     setExpanded(true);
@@ -124,7 +126,8 @@ export function Sidebar() {
             AI Assistant
           </span>
         </Link>
-        <div
+        {!isDemo && (
+          <div
           className={cn(
             "transition-all duration-300 overflow-hidden",
             expanded ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
@@ -137,6 +140,7 @@ export function Sidebar() {
           </Link>
 
         </div>
+        )}
       </div>
 
       {/* Theme Toggle & User profile */}

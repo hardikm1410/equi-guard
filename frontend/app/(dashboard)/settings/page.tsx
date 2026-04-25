@@ -39,16 +39,16 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setTourRun(true)}
-                className="group p-3 rounded-2xl bg-content/[0.04] border border-content/[0.08] hover:bg-content/[0.08] transition-all hover:border-cta/30"
+                className="group p-2 rounded-2xl bg-content/[0.04] border border-content/[0.08] hover:bg-content/[0.08] transition-all hover:border-cta/30"
                 title="Start Tour"
               >
-                <HelpCircle className="w-6 h-6 text-content/40 group-hover:text-cta transition-colors" />
+                <HelpCircle className="w-5 h-5 text-content/40 group-hover:text-cta transition-colors" />
               </button>
               <button 
                 onMouseEnter={() => setBtnExpanded(true)}
                 onMouseLeave={() => setBtnExpanded(false)}
                 onClick={() => {router.push("/upload")}}
-                className={`inline-flex items-center justify-center gap-2 bg-cta text-white text-md font-semibold h-[48px] rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-cta shadow-lg shadow-content/[0.05] overflow-hidden ${btnExpanded ? "w-[100px] px-5" : "w-[48px] px-0"}`}
+                className={`inline-flex items-center justify-center gap-2 bg-cta text-white text-md font-semibold h-[38px] rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-cta shadow-lg shadow-content/[0.05] overflow-hidden ${btnExpanded ? "w-[100px] px-5" : "w-[38px] px-0"}`}
               >
                 <Save className="w-5 h-5 shrink-0" />
                 <span className={`whitespace-nowrap transition-all duration-300 ${btnExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 hidden"}`}>Save</span>
@@ -150,7 +150,7 @@ export default function SettingsPage() {
 
         {/* Danger Zone */}
         <div className="glass-card rounded-xl p-6 border-content/[0.08]">
-          <div className="flex items-center justify-between"><div><p className="text-sm font-medium text-content/70">Reset All Settings</p><p className="text-xs text-content/30 mt-0.5">This will restore all settings to their default values</p></div><button className="text-xs font-medium text-destructive/0 bg-content/[0.08] hover:bg-content/[0.12] border border-content/[0.12] px-4 py-2 rounded-lg transition-all">Reset</button></div>
+          <div className="flex items-center justify-between"><div><p className="text-sm font-medium text-content/70">Reset All Settings</p><p className="text-xs text-content/30 mt-0.5">This will restore all settings to their default values</p></div><button className="text-xs font-medium text-destructive bg-content/[0.08] hover:bg-content/[0.12] border border-content/[0.12] px-4 py-2 rounded-lg transition-all">Reset</button></div>
         </div>
       </div>
     </div>

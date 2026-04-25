@@ -51,7 +51,7 @@ export default function LandingPage() {
     e.preventDefault();
     setContactStatus("submitting");
     const form = e.target as HTMLFormElement;
-    
+
     try {
       await fetch("https://formsubmit.co/ajax/hardik.baps.ahd@gmail.com", {
         method: "POST",
@@ -61,7 +61,7 @@ export default function LandingPage() {
         },
         body: JSON.stringify(Object.fromEntries(new FormData(form))),
       });
-      
+
       setContactStatus("success");
       form.reset();
       setTimeout(() => setContactStatus("idle"), 3000);

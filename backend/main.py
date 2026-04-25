@@ -54,6 +54,17 @@ def root():
 
 @app.post("/evaluate")
 def evaluate(input: ResumeInput):
+    # If it's just a sample request from the dashboard/evaluation pages
+    if input.resume_text == "sample":
+        return {
+            "original_score": 0,
+            "shadow_score": 0,
+            "bias_detected": False,
+            "bias_gap": 0,
+            "verdict": "NO DATA"
+        }
+    
+    # Real evaluation logic (mocked for now but with realistic values)
     return {
         "original_score": 85,
         "shadow_score": 72,
