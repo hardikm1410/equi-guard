@@ -185,7 +185,7 @@ export default function LandingPage() {
                       ))}
                     </div>
                     <div className="flex gap-2">{[...Array(7)].map((_, i) => (<div key={i} className="flex-1 flex flex-col justify-end h-16 gap-1"><div className="w-full rounded-sm bg-content/[0.08]" style={{ height: `${30 + Math.sin(i) * 20 + 20}%` }} /><div className="w-full rounded-sm bg-primary/60" style={{ height: `${50 + Math.cos(i) * 15 + 15}%` }} /></div>))}</div>
-                  </div>x``
+                  </div>
                 </div>
               </div>
 

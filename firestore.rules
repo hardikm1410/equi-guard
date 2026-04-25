@@ -1,18 +1,41 @@
-rules_version='2'
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Rules for user profiles
+    match /users/{userId} {
+      // Users can read and write their own profile
+      // Admins can read and write any profile
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+    
+    // Allow admins to list all users (needed for the admin panel)
+    match /users {
+      allow list: if isAdmin();
+    }
+
+    // Rules for audit logs
+    match /audit_logs/{logId} {
+      // Only admins can view logs
+      allow read: if isAdmin();
+      // Any authenticated user can create a log (e.g. system events)
+      // but only admins should trigger administrative logs
+      allow create: if request.auth != null;
+      // Logs should never be edited or deleted
+      allow update, delete: if false;
+    }
+
+    // Default rule for other collections (e.g. bias evaluations, reports)
     match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 5, 23);
+      // Require authentication for everything else
+      allow read, write: if request.auth != null;
     }
   }
 }
