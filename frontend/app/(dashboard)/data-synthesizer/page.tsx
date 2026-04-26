@@ -22,8 +22,6 @@ export default function UploadPage() {
 
   const [file, setFile] = useState<File | null>(null);
 
-  const [targetVar, setTargetVar] = useState("");
-  const [protectedAttr, setProtectedAttr] = useState("");
 
   const [result, setResult] = useState<any>(null);
 
@@ -31,7 +29,7 @@ export default function UploadPage() {
   // ANALYZE
   // ========================================
   const handleAnalyze = async () => {
-    if (!file || !targetVar || !protectedAttr) {
+    if (!file ) {
       alert("Upload file and enter fields.");
       return;
     }
@@ -42,8 +40,6 @@ export default function UploadPage() {
       const formData = new FormData();
 
       formData.append("file", file);
-      formData.append("target", targetVar);
-      formData.append("protected", protectedAttr);
 
       const response = await fetch("http://127.0.0.1:8000/analyze", {
         method: "POST",
@@ -183,8 +179,7 @@ export default function UploadPage() {
 
                 <input
                   type="hidden"
-                  value={targetVar}
-                  onChange={(e) => setTargetVar(e.target.value)}
+                  value=none
                   placeholder="Ex: hired"
                   className="w-full bg-background border border-content/[0.08] rounded-lg px-3 py-2.5 text-md md:text-sm text-content/80 focus:outline-none"
                 />
@@ -198,8 +193,7 @@ export default function UploadPage() {
 
                 <input
                   type="hidden"
-                  value={protectedAttr}
-                  onChange={(e) => setProtectedAttr(e.target.value)}
+                  value=none
                   placeholder="Ex: gender"
                   className="w-full bg-background border border-content/[0.08] rounded-lg px-3 py-2.5 text-md md:text-sm text-content/80 focus:outline-none"
                 />
