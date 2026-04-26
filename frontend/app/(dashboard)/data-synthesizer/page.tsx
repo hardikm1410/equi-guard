@@ -22,8 +22,8 @@ export default function UploadPage() {
 
   const [file, setFile] = useState<File | null>(null);
 
-  const [targetVar, setTargetVar] = useState("");
-  const [protectedAttr, setProtectedAttr] = useState("");
+  // const [targetVar, setTargetVar] = useState("");
+  // const [protectedAttr, setProtectedAttr] = useState("");
 
   const [result, setResult] = useState<any>(null);
 
@@ -31,7 +31,11 @@ export default function UploadPage() {
   // ANALYZE
   // ========================================
   const handleAnalyze = async () => {
-    if (!file || !targetVar || !protectedAttr) {
+    // if (!file || !targetVar || !protectedAttr) {
+    //   alert("Upload file and enter fields.");
+    //   return;
+    // }
+    if (!file) {
       alert("Upload file and enter fields.");
       return;
     }
