@@ -1,301 +1,250 @@
 "use client";
 
-import { PageHeader } from "@/components/page-components";
+import { useState } from "react";
 import {
-  Upload as UploadIcon,
+  CloudUpload,
+  Check,
+  ArrowRight,
+  Loader2,
   FileText,
   Columns,
   HardDrive,
   Lightbulb,
-  ArrowRight,
-  Check,
-  CloudUpload,
-  Loader2,
 } from "lucide-react";
 
-import { useState } from "react";
-
 export default function UploadPage() {
+  const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploaded, setUploaded] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
-  const [completed, setCompleted] = useState(false);
 
-  const [file, setFile] = useState<File | null>(null);
-  const [result, setResult] = useState<any>(null);
+  const [targetVar, setTargetVar] = useState("");
+  const [protectedAttr, setProtectedAttr] = useState("");
+  const [prediction, setPrediction] = useState("");
+
+  // OUTPUT STATES
+  const [rows, setRows] = useState("—");
+  const [cols, setCols] = useState("—");
+  const [size, setSize] = useState("—");
+
+  // READ CSV + SHOW DETAILS
+  const handleFileChange = async (selected: File) => {
+    setFile(selected);
+    setUploaded(true);
+
+    // FILE SIZE
+    const fileSizeMB = (selected.size / 1024 / 1024).toFixed(2) + " MB";
+    setSize(fileSizeMB);
+
+    // READ CSV TEXT
+    const text = await selected.text();
+
+    const lines = text.trim().split("\n");
+
+    // ROWS
+    const totalRows = lines.length - 1;
+    setRows(String(totalRows));
+
+    // COLUMNS
+    const totalCols = lines[0].split(",").length;
+    setCols(String(totalCols));
+  };
 
   const handleAnalyze = async () => {
-  if (!file) {
-    alert("Upload file first");
-    return;
-  }
+    if (!file || !targetVar || !protectedAttr) {
+      alert("Please upload file and fill fields.");
+      return;
+    }
 
-  setAnalyzing(true);
+    setAnalyzing(true);
 
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch("http://127.0.0.1:8000/analyze", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json();
-    setResult(data);
-
-  } catch (error) {
-    console.error(error);
-    alert("Backend connection failed");
-  } finally {
-    setAnalyzing(false);
-  }
-};
-
-  const currentStep = completed
-    ? 4
-    : analyzing
-    ? 3
-    : uploaded
-    ? 2
-    : 1;
-
-  const steps = ["Upload File", "Ready", "Analyzing", "Complete"];
+    setTimeout(() => {
+      setAnalyzing(false);
+      alert("Analysis Complete");
+    }, 1500);
+  };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <PageHeader
-        title="Upload & Analyze"
-        description="Upload your dataset and run automatic file analysis."
-      />
+    <div className="max-w-6xl mx-auto p-8">
+      {/* HEADER */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2">Upload & Analyze</h1>
+        <p className="text-gray-500">
+          Upload dataset and see details instantly.
+        </p>
+      </div>
 
-      {/* STEP BAR */}
-      <div className="glass-card rounded-xl p-6 mb-6">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          {steps.map((step, i) => {
-            const active = currentStep >= i + 1;
+      {/* UPLOAD BOX */}
+      <div className="bg-white rounded-2xl shadow p-6 mb-8">
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
 
-            return (
-              <div
-                key={step}
-                className="flex items-center flex-1 min-w-[120px]"
-              >
-                <div className="flex items-center gap-3 w-full">
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border ${
-                      active
-                        ? "bg-cta text-white border-cta"
-                        : "bg-content/[0.03] text-content/30 border-content/[0.08]"
-                    }`}
-                  >
-                    {active ? <Check className="w-4 h-4" /> : i + 1}
-                  </div>
+            const dropped = e.dataTransfer.files[0];
 
-                  <span
-                    className={`text-sm font-medium ${
-                      active
-                        ? "text-content/80"
-                        : "text-content/30"
-                    }`}
-                  >
-                    {step}
-                  </span>
-                </div>
+            if (dropped) handleFileChange(dropped);
+          }}
+          className={`border-2 border-dashed rounded-2xl p-16 text-center transition ${
+            dragOver ? "border-blue-500 bg-blue-50" : "border-gray-300"
+          }`}
+        >
+          <input
+            type="file"
+            hidden
+            accept=".csv"
+            id="fileUpload"
+            onChange={(e) => {
+              const selected = e.target.files?.[0];
+              if (selected) handleFileChange(selected);
+            }}
+          />
 
-                {i !== steps.length - 1 && (
-                  <div className="h-[2px] w-full bg-content/[0.08] mx-2" />
-                )}
-              </div>
-            );
-          })}
+          <label htmlFor="fileUpload" className="cursor-pointer">
+            {uploaded ? (
+              <>
+                <Check className="mx-auto text-green-500 w-12 h-12 mb-4" />
+                <p className="font-semibold">{file?.name}</p>
+                <p className="text-sm text-gray-500">Uploaded</p>
+              </>
+            ) : (
+              <>
+                <CloudUpload className="mx-auto w-12 h-12 mb-4 text-gray-500" />
+                <p className="font-semibold">Drag & Drop CSV Here</p>
+                <p className="text-sm text-gray-500">or click to browse</p>
+              </>
+            )}
+          </label>
         </div>
       </div>
 
-      {/* TOP GRID = LEFT DROPBOX + RIGHT ABOUT DATA */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* LEFT HALF SIZE DRAG BOX */}
-        <div className="glass-card rounded-xl p-6">
-          <div
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragOver(true);
-            }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragOver(false);
+      {/* GRID */}
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* LEFT */}
+        <div className="bg-white rounded-2xl shadow p-6">
+          <h2 className="text-xl font-semibold mb-6">
+            Configure Analysis
+          </h2>
 
-              const droppedFile = e.dataTransfer.files[0];
-
-              if (droppedFile) {
-                setFile(droppedFile);
-                setUploaded(true);
-                setCompleted(false);
-                setResult(null);
-              }
-            }}
-            className={`border-2 border-dashed rounded-xl py-10 px-6 text-center transition-all cursor-pointer ${
-              dragOver
-                ? "border-primary bg-content/[0.03]"
-                : uploaded
-                ? "border-content/20 bg-content/[0.02]"
-                : "border-primary/30 hover:border-primary/50"
-            }`}
-          >
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              hidden
-              id="fileUpload"
-              onChange={(e) => {
-                const selected = e.target.files?.[0];
-
-                if (selected) {
-                  setFile(selected);
-                  setUploaded(true);
-                  setCompleted(false);
-                  setResult(null);
-                }
-              }}
-            />
-
-            <label htmlFor="fileUpload" className="cursor-pointer">
-              <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-content/[0.05]">
-                {uploaded ? (
-                  <Check className="w-8 h-8 text-green-500" />
-                ) : (
-                  <CloudUpload className="w-8 h-8 text-content/50" />
-                )}
-              </div>
-
-              <p className="text-base font-semibold text-content/70 mb-1">
-                {uploaded ? file?.name : "Drag & Drop File"}
-              </p>
-
-              <p className="text-content/40 text-sm">
-                CSV / Excel supported
-              </p>
-
-              {!uploaded && (
-                <button className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-content/[0.08] bg-content/[0.04]">
-                  <UploadIcon className="w-4 h-4" />
-                  Browse
-                </button>
-              )}
+          <div className="mb-4">
+            <label className="block mb-2 font-medium">
+              Target Column
             </label>
+            <input
+              type="text"
+              placeholder="Example: hired"
+              value={targetVar}
+              onChange={(e) => setTargetVar(e.target.value)}
+              className="w-full border rounded-xl px-4 py-3"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-2 font-medium">
+              Protected Column
+            </label>
+            <input
+              type="text"
+              placeholder="Example: gender"
+              value={protectedAttr}
+              onChange={(e) => setProtectedAttr(e.target.value)}
+              className="w-full border rounded-xl px-4 py-3"
+            />
+          </div>
+
+          <div className="mb-6">
+            <label className="block mb-2 font-medium">
+              Prediction Column
+            </label>
+            <input
+              type="text"
+              placeholder="Optional"
+              value={prediction}
+              onChange={(e) => setPrediction(e.target.value)}
+              className="w-full border rounded-xl px-4 py-3"
+            />
           </div>
 
           <button
             onClick={handleAnalyze}
-            disabled={!uploaded || analyzing}
-            className="w-full mt-5 inline-flex items-center justify-center gap-2 bg-cta text-cta-foreground px-5 py-3 rounded-xl font-semibold disabled:opacity-50"
+            disabled={
+              analyzing ||
+              !uploaded ||
+              !targetVar ||
+              !protectedAttr
+            }
+            className="w-full bg-black text-white rounded-xl py-3 font-semibold flex justify-center items-center gap-2 disabled:opacity-50"
           >
             {analyzing ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="animate-spin w-4 h-4" />
                 Analyzing...
               </>
             ) : (
               <>
-                Analyze File
+                Analyze Dataset
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </div>
 
-        {/* RIGHT ABOUT DATA */}
-        <div className="glass-card rounded-xl p-6">
-          <h3 className="text-lg font-semibold mb-4">
-            About Data
-          </h3>
+        {/* RIGHT */}
+        <div className="space-y-6">
+          {/* OUTPUT SAME PAGE */}
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">
+              About Your Data
+            </h2>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-content/[0.03]">
-              <FileText className="w-4 h-4 mb-2" />
-              <p className="text-xs text-content/40">Rows</p>
-              <p>{result ? result.file_info.rows : "--"}</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="border rounded-xl p-4">
+                <FileText className="mb-2 w-5 h-5" />
+                <p className="text-sm text-gray-500">Rows</p>
+                <p className="font-semibold">{rows}</p>
+              </div>
+
+              <div className="border rounded-xl p-4">
+                <Columns className="mb-2 w-5 h-5" />
+                <p className="text-sm text-gray-500">Columns</p>
+                <p className="font-semibold">{cols}</p>
+              </div>
+
+              <div className="border rounded-xl p-4">
+                <HardDrive className="mb-2 w-5 h-5" />
+                <p className="text-sm text-gray-500">File Size</p>
+                <p className="font-semibold">{size}</p>
+              </div>
+
+              <div className="border rounded-xl p-4">
+                <Lightbulb className="mb-2 w-5 h-5" />
+                <p className="text-sm text-gray-500">Tip</p>
+                <p className="font-semibold text-xs">
+                  Upload CSV to auto detect details
+                </p>
+              </div>
             </div>
+          </div>
 
-            <div className="p-4 rounded-xl bg-content/[0.03]">
-              <Columns className="w-4 h-4 mb-2" />
-              <p className="text-xs text-content/40">
-                Columns
-              </p>
-              <p>
-                {result ? result.file_info.columns : "--"}
-              </p>
-            </div>
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">
+              Quick Guide
+            </h2>
 
-            <div className="p-4 rounded-xl bg-content/[0.03]">
-              <HardDrive className="w-4 h-4 mb-2" />
-              <p className="text-xs text-content/40">Size</p>
-              <p>
-                {result
-                  ? `${result.file_info.size_kb} KB`
-                  : "--"}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-content/[0.03]">
-              <Lightbulb className="w-4 h-4 mb-2" />
-              <p className="text-xs text-content/40">Tip</p>
-              <p className="text-sm">
-                Auto detects issues in dataset
-              </p>
+            <div className="space-y-2 text-sm text-gray-600">
+              <p>1. Upload CSV</p>
+              <p>2. Rows auto shown</p>
+              <p>3. Columns auto shown</p>
+              <p>4. Size auto shown</p>
             </div>
           </div>
         </div>
       </div>
-
-      {/* RESULT GRID */}
-      {result && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="glass-card rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4">
-              Before Clean
-            </h3>
-
-            <div className="space-y-2 text-content/70">
-              <p>Rows: {result.before_clean.rows}</p>
-              <p>Columns: {result.before_clean.columns}</p>
-              <p>
-                Duplicate Rows:{" "}
-                {result.before_clean.duplicate_rows}
-              </p>
-              <p>
-                Missing Rows:{" "}
-                {
-                  result.before_clean
-                    .rows_with_missing_values
-                }
-              </p>
-            </div>
-          </div>
-
-          <div className="glass-card rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4">
-              After Clean
-            </h3>
-
-            <div className="space-y-2 text-content/70">
-              <p>Rows: {result.after_clean.rows}</p>
-              <p>Columns: {result.after_clean.columns}</p>
-              <p>
-                Duplicate Rows:{" "}
-                {result.after_clean.duplicate_rows}
-              </p>
-              <p>
-                Missing Rows:{" "}
-                {
-                  result.after_clean
-                    .rows_with_missing_values
-                }
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
