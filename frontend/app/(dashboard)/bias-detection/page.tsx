@@ -12,8 +12,6 @@ import {
   Upload,
   Check,
   CloudUpload,
-  HelpCircle,
-  Loader2,
 } from "lucide-react";
 
 import {
@@ -24,6 +22,7 @@ import {
   Tooltip,
 } from "recharts";
 
+import { HelpCircle, Loader2 } from "lucide-react";
 import AppTour from "@/components/AppTour";
 import { BIAS_DETECTION_STEPS } from "@/lib/tour-steps";
 import { useAuth } from "@/components/auth-context";
@@ -39,8 +38,10 @@ export default function BiasDetectionPage() {
   const [tourRun, setTourRun] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // upload
+  // files
   const [file, setFile] = useState<File | null>(null);
+  const [predictionFile, setPredictionFile] = useState<File | null>(null);
+
   const [dragOver, setDragOver] = useState(false);
   const [uploaded, setUploaded] = useState(false);
 
@@ -51,7 +52,6 @@ export default function BiasDetectionPage() {
   // response
   const [data, setData] = useState<any>(null);
 
-  // demo data
   useEffect(() => {
     if (isDemo) {
       setData({
@@ -63,7 +63,6 @@ export default function BiasDetectionPage() {
           {
             name: "Disparate Impact",
             value: "0.62",
-            threshold: "< 0.80",
             status: "fail",
           },
         ],
@@ -89,10 +88,9 @@ export default function BiasDetectionPage() {
     }
   }, [isDemo]);
 
-  // API CALL
   const handleAnalyze = async () => {
     if (!file || !target || !protectedCol) {
-      alert("Please upload file and fill all fields");
+      alert("Please upload dataset and fill required fields.");
       return;
     }
 
@@ -100,9 +98,14 @@ export default function BiasDetectionPage() {
 
     try {
       const formData = new FormData();
+
       formData.append("file", file);
       formData.append("target", target);
       formData.append("protected", protectedCol);
+
+      if (predictionFile) {
+        formData.append("prediction_file", predictionFile);
+      }
 
       const response = await fetch(`${API_URL}/bias`, {
         method: "POST",
@@ -110,12 +113,6 @@ export default function BiasDetectionPage() {
       });
 
       const result = await response.json();
-
-      if (result.error) {
-        alert(result.error);
-        setLoading(false);
-        return;
-      }
 
       const colors = [
         "var(--primary)",
@@ -125,19 +122,21 @@ export default function BiasDetectionPage() {
         "#82ca9d",
       ];
 
-      const chartData =
-        result.selectionRateData?.map((item: any, index: number) => ({
-          ...item,
-          color: colors[index % colors.length],
-        })) || [];
+      const finalRates =
+        result.selectionRateData?.map(
+          (item: any, index: number) => ({
+            ...item,
+            color: colors[index % colors.length],
+          })
+        ) || [];
 
       setData({
         ...result,
-        selectionRateData: chartData,
+        selectionRateData: finalRates,
       });
     } catch (error) {
       console.error(error);
-      alert("Backend connection failed");
+      alert("Failed to analyze.");
     } finally {
       setLoading(false);
     }
@@ -148,7 +147,7 @@ export default function BiasDetectionPage() {
     payload,
   }: {
     active?: boolean;
-    payload?: any[];
+    payload?: Array<{ name: string; value: number }>;
   }) => {
     if (active && payload && payload.length) {
       return (
@@ -159,6 +158,7 @@ export default function BiasDetectionPage() {
         </div>
       );
     }
+
     return null;
   };
 
@@ -181,22 +181,39 @@ export default function BiasDetectionPage() {
         onFinish={() => setTourRun(false)}
       />
 
-      <PageHeader
-        title="Bias Detection"
-        description="Detailed bias analysis results and fairness metrics."
-        action={
-          <button
-            onClick={() => setTourRun(true)}
-            className="p-2 rounded-xl border border-content/10"
-          >
-            <HelpCircle className="w-5 h-5 text-content/50" />
-          </button>
-        }
-      />
+      {/* HEADER */}
+      <div className="tour-detection-header">
+        <PageHeader
+          title="Bias Detection"
+          description="Detailed bias analysis results and fairness metrics."
+          action={
+            <div className="flex flex-wrap items-center gap-2 md:gap-3 justify-end">
+              <button
+                onClick={() => setTourRun(true)}
+                className="group p-2 rounded-2xl bg-content/[0.04] border border-content/[0.08]"
+              >
+                <HelpCircle className="w-5 h-5 text-content/40" />
+              </button>
 
-      {/* UPLOAD SECTION */}
-      <div className="glass-card rounded-xl p-6 mt-6 mb-6">
-        <h3 className="text-lg font-semibold mb-4">Upload Dataset</h3>
+              <button className="inline-flex items-center gap-2 text-sm text-content/50 bg-content/[0.04] border border-content/[0.08] px-3 py-2 rounded-lg">
+                <Filter className="w-4 h-4" />
+                Group Filter
+              </button>
+
+              <button className="inline-flex items-center gap-2 text-sm text-content/50 bg-content/[0.04] border border-content/[0.08] px-3 py-2 rounded-lg">
+                <Eye className="w-4 h-4" />
+                View Options
+              </button>
+            </div>
+          }
+        />
+      </div>
+
+      {/* FILE UPLOAD */}
+      <div className="glass-card rounded-xl p-6 mb-6">
+        <h3 className="text-lg font-semibold text-content mb-4">
+          Upload Dataset
+        </h3>
 
         <div
           onDragOver={(e) => {
@@ -215,14 +232,16 @@ export default function BiasDetectionPage() {
               setUploaded(true);
             }
           }}
-          className={`border-2 border-dashed rounded-xl p-10 text-center ${
-            dragOver ? "border-primary" : "border-content/20"
+          className={`border-2 border-dashed rounded-xl py-12 px-6 text-center transition-all ${
+            dragOver
+              ? "border-primary bg-content/[0.04]"
+              : "border-content/20"
           }`}
         >
           <input
             hidden
             type="file"
-            id="csvfile"
+            id="mainFile"
             accept=".csv"
             onChange={(e) => {
               const selected = e.target.files?.[0];
@@ -234,57 +253,78 @@ export default function BiasDetectionPage() {
             }}
           />
 
-          <label htmlFor="csvfile" className="cursor-pointer">
+          <label htmlFor="mainFile" className="cursor-pointer">
             {uploaded ? (
               <>
-                <Check className="w-10 h-10 mx-auto mb-3 text-green-500" />
-                <p>{file?.name}</p>
+                <Check className="w-12 h-12 mx-auto mb-4 text-green-500" />
+                <p className="text-content font-medium">
+                  {file?.name}
+                </p>
+                <p className="text-content/40 text-sm">
+                  Uploaded Successfully
+                </p>
               </>
             ) : (
               <>
-                <CloudUpload className="w-10 h-10 mx-auto mb-3 text-content/50" />
-                <p>Drag CSV here or click</p>
+                <CloudUpload className="w-12 h-12 mx-auto mb-4 text-content/50" />
+                <p className="text-content font-medium">
+                  Drag & Drop CSV File
+                </p>
+                <p className="text-content/40 text-sm mb-4">
+                  or click to browse
+                </p>
+
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-content/[0.05] border border-content/[0.08] text-content/60">
+                  <Upload className="w-4 h-4" />
+                  Browse File
+                </span>
               </>
             )}
           </label>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4 mt-5">
+        {/* INPUTS */}
+        <div className="grid md:grid-cols-3 gap-4 mt-6">
           <input
-            placeholder="Target Column"
+            type="text"
+            placeholder="Target Column (hired)"
             value={target}
             onChange={(e) => setTarget(e.target.value)}
-            className="border rounded-lg px-4 py-3 bg-background"
+            className="bg-background border border-content/[0.08] rounded-lg px-4 py-3"
           />
 
           <input
-            placeholder="Protected Column"
+            type="text"
+            placeholder="Protected Column (gender)"
             value={protectedCol}
             onChange={(e) => setProtectedCol(e.target.value)}
-            className="border rounded-lg px-4 py-3 bg-background"
+            className="bg-background border border-content/[0.08] rounded-lg px-4 py-3"
+          />
+
+          <input
+            type="file"
+            accept=".csv"
+            onChange={(e) =>
+              setPredictionFile(
+                e.target.files?.[0] || null
+              )
+            }
+            className="bg-background border border-content/[0.08] rounded-lg px-4 py-3"
           />
         </div>
 
         <button
           onClick={handleAnalyze}
-          className="mt-5 w-full bg-cta text-cta-foreground rounded-xl py-3 font-semibold flex justify-center gap-2"
+          className="mt-6 w-full bg-cta text-cta-foreground rounded-xl py-3 font-semibold flex justify-center items-center gap-2"
         >
           Analyze Bias
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>
 
-      {/* RESULT */}
-      {!data ? (
-        <div className="glass-card rounded-xl p-10 text-center">
-          <ShieldAlert className="w-12 h-12 mx-auto mb-4 text-content/20" />
-          <h3 className="text-xl font-bold mb-2">No analysis yet</h3>
-          <p className="text-content/40">
-            Upload dataset and click Analyze Bias
-          </p>
-        </div>
-      ) : (
-        <div className="grid lg:grid-cols-3 gap-6">
+      {/* RESULTS */}
+      {data && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT */}
           <div className="lg:col-span-2 space-y-6">
             {/* SCORE */}
@@ -312,35 +352,48 @@ export default function BiasDetectionPage() {
                       stroke="var(--primary)"
                       strokeWidth="8"
                       strokeLinecap="round"
-                      strokeDasharray={`${2 * Math.PI * 52}`}
+                      strokeDasharray={`${
+                        2 * Math.PI * 52
+                      }`}
                       strokeDashoffset={`${
-                        2 * Math.PI * 52 * (1 - data.biasScore)
+                        2 *
+                        Math.PI *
+                        52 *
+                        (1 - data.biasScore)
                       }`}
                     />
                   </svg>
 
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-3xl font-bold">
+                    <span className="text-3xl font-bold text-content">
                       {data.biasScore}
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-content/60">{data.biasStatus}</p>
-                  <h3 className="text-xl font-bold">Bias Score</h3>
+                  <p className="text-content/60 mb-2">
+                    {data.biasStatus}
+                  </p>
+
+                  <h3 className="text-xl font-bold text-content">
+                    Bias Score
+                  </h3>
                 </div>
               </div>
             </div>
 
             {/* CHART */}
             <div className="glass-card rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">
+              <h3 className="text-lg font-semibold text-content mb-4">
                 Selection Rate by Group
               </h3>
 
               <div className="w-full h-64">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                >
                   <PieChart>
                     <Pie
                       data={data.selectionRateData}
@@ -349,7 +402,10 @@ export default function BiasDetectionPage() {
                       outerRadius={85}
                     >
                       {data.selectionRateData.map(
-                        (entry: any, index: number) => (
+                        (
+                          entry: any,
+                          index: number
+                        ) => (
                           <Cell
                             key={index}
                             fill={entry.color}
@@ -358,7 +414,9 @@ export default function BiasDetectionPage() {
                       )}
                     </Pie>
 
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip
+                      content={<CustomTooltip />}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -368,19 +426,20 @@ export default function BiasDetectionPage() {
           {/* RIGHT */}
           <div className="space-y-6">
             <div className="glass-card rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">
+              <h3 className="text-lg font-semibold text-content mb-4">
                 Key Insights
               </h3>
 
               <div className="space-y-3">
-                {data.keyInsights?.map(
+                {data.keyInsights.map(
                   (item: string, i: number) => (
                     <div
                       key={i}
                       className="flex gap-3 items-start"
                     >
-                      <AlertTriangle className="w-4 h-4 mt-1 text-content/50" />
-                      <p className="text-sm text-content/60">
+                      <AlertTriangle className="w-4 h-4 text-content/50 mt-1" />
+
+                      <p className="text-content/60 text-sm">
                         {item}
                       </p>
                     </div>
@@ -389,23 +448,26 @@ export default function BiasDetectionPage() {
               </div>
             </div>
 
-            <div className="glass-card rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">
-                Bias Metrics
-              </h3>
+            <button className="w-full glass-card rounded-xl p-4 flex justify-between items-center">
+              <span className="text-content/60">
+                View Full Analysis
+              </span>
 
-              {data.biasMetricsSummary?.map(
-                (m: any, i: number) => (
-                  <div key={i} className="mb-4">
-                    <p>{m.name}</p>
-                    <p className="text-xl font-bold">
-                      {m.value}
-                    </p>
-                  </div>
-                )
-              )}
-            </div>
+              <ArrowRight className="w-4 h-4 text-content/40" />
+            </button>
           </div>
+        </div>
+      )}
+
+      {!data && !loading && (
+        <div className="glass-card rounded-xl p-10 text-center">
+          <ShieldAlert className="w-12 h-12 mx-auto mb-4 text-content/20" />
+          <h3 className="text-xl font-bold text-content mb-2">
+            No analysis yet
+          </h3>
+          <p className="text-content/40">
+            Upload dataset and run analysis.
+          </p>
         </div>
       )}
     </div>
