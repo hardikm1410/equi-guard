@@ -11,6 +11,7 @@ import {
   Check,
   CloudUpload,
   Loader2,
+  Download,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -19,6 +20,7 @@ export default function UploadPage() {
   const [dragOver, setDragOver] = useState(false);
   const [uploaded, setUploaded] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
@@ -53,6 +55,47 @@ export default function UploadPage() {
     }
   };
 
+  // ========================================
+  // DOWNLOAD CLEAN FILE
+  // ========================================
+  const handleDownload = async () => {
+    if (!file) return;
+
+    setDownloading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/download-cleaned",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "cleaned_dataset.csv";
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      alert("Download failed");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       {/* HEADER */}
@@ -61,9 +104,9 @@ export default function UploadPage() {
         description="Upload your dataset and get instant analysis."
       />
 
-      {/* TOP SECTION SIDE BY SIDE */}
+      {/* TOP SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* FILE UPLOAD BOX */}
+        {/* UPLOAD */}
         <div className="glass-card rounded-xl p-6">
           <h3 className="text-lg font-semibold text-content mb-4">
             Upload Dataset
@@ -139,24 +182,44 @@ export default function UploadPage() {
             </label>
           </div>
 
-          {/* BUTTON */}
-          <button
-            onClick={handleAnalyze}
-            disabled={analyzing || !uploaded}
-            className="w-full mt-5 inline-flex items-center justify-center gap-2 bg-cta text-cta-foreground text-md font-semibold px-5 py-3 rounded-xl transition-all hover:bg-cta/90 disabled:opacity-50"
-          >
-            {analyzing ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              <>
-                Analyze File
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
+          {/* BUTTONS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+            <button
+              onClick={handleAnalyze}
+              disabled={analyzing || !uploaded}
+              className="inline-flex items-center justify-center gap-2 bg-cta text-cta-foreground px-5 py-3 rounded-xl font-semibold hover:bg-cta/90 disabled:opacity-50"
+            >
+              {analyzing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  Analyze
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleDownload}
+              disabled={!result || downloading}
+              className="inline-flex items-center justify-center gap-2 bg-content/[0.08] text-content px-5 py-3 rounded-xl font-semibold hover:bg-content/[0.12] disabled:opacity-50"
+            >
+              {downloading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  Download Clean File
+                  <Download className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* ABOUT DATA */}
@@ -173,48 +236,37 @@ export default function UploadPage() {
             <div className="bg-content/[0.02] border border-content/[0.06] rounded-lg p-4">
               <FileText className="w-4 h-4 text-content/50 mb-2" />
               <span className="text-xs text-content/50">Rows</span>
-              <p className="text-content/70">
-                {result ? result.file_info.rows : "—"}
-              </p>
+              <p>{result ? result.file_info.rows : "—"}</p>
             </div>
 
             <div className="bg-content/[0.02] border border-content/[0.06] rounded-lg p-4">
               <Columns className="w-4 h-4 text-content/50 mb-2" />
               <span className="text-xs text-content/50">Columns</span>
-              <p className="text-content/70">
-                {result ? result.file_info.columns : "—"}
-              </p>
+              <p>{result ? result.file_info.columns : "—"}</p>
             </div>
 
             <div className="bg-content/[0.02] border border-content/[0.06] rounded-lg p-4">
               <HardDrive className="w-4 h-4 text-content/50 mb-2" />
               <span className="text-xs text-content/50">Size</span>
-              <p className="text-content/70">
-                {result ? `${result.file_info.size_kb} KB` : "—"}
-              </p>
+              <p>{result ? `${result.file_info.size_kb} KB` : "—"}</p>
             </div>
 
             <div className="bg-content/[0.02] border border-content/[0.06] rounded-lg p-4 sm:col-span-3">
               <Lightbulb className="w-4 h-4 text-content/50 mb-2" />
               <span className="text-xs text-content/50">Tip</span>
-              <p className="text-content/70">
-                Upload CSV or Excel file for instant cleaning analysis.
-              </p>
+              <p>Analyze first, then download cleaned dataset.</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* RESULT SECTION */}
+      {/* RESULT */}
       {result && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* BEFORE */}
           <div className="glass-card rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-content mb-4">
-              Before Clean
-            </h3>
+            <h3 className="text-lg font-semibold mb-4">Before Clean</h3>
 
-            <div className="space-y-2 text-content/70">
+            <div className="space-y-2">
               <p>Rows: {result.before_clean.rows}</p>
               <p>Columns: {result.before_clean.columns}</p>
               <p>Duplicate Rows: {result.before_clean.duplicate_rows}</p>
@@ -225,13 +277,10 @@ export default function UploadPage() {
             </div>
           </div>
 
-          {/* AFTER */}
           <div className="glass-card rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-content mb-4">
-              After Clean
-            </h3>
+            <h3 className="text-lg font-semibold mb-4">After Clean</h3>
 
-            <div className="space-y-2 text-content/70">
+            <div className="space-y-2">
               <p>Rows: {result.after_clean.rows}</p>
               <p>Columns: {result.after_clean.columns}</p>
               <p>Duplicate Rows: {result.after_clean.duplicate_rows}</p>
