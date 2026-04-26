@@ -22,6 +22,8 @@ export default function UploadPage() {
 
   const [file, setFile] = useState<File | null>(null);
 
+  const [targetVar, setTargetVar] = useState("");
+  const [protectedAttr, setProtectedAttr] = useState("");
 
   const [result, setResult] = useState<any>(null);
 
@@ -29,7 +31,7 @@ export default function UploadPage() {
   // ANALYZE
   // ========================================
   const handleAnalyze = async () => {
-    if (!file) {
+    if (!file || !targetVar || !protectedAttr) {
       alert("Upload file and enter fields.");
       return;
     }
@@ -40,6 +42,8 @@ export default function UploadPage() {
       const formData = new FormData();
 
       formData.append("file", file);
+      formData.append("target", targetVar);
+      formData.append("protected", protectedAttr);
 
       const response = await fetch("http://127.0.0.1:8000/analyze", {
         method: "POST",
@@ -171,10 +175,42 @@ export default function UploadPage() {
             </p>
 
             <div className="space-y-4">
-           
+              {/* TARGET */}
+              <div>
+                <label className="block text-lg md:text-sm font-medium text-content/50 mb-2">
+                  Target Variable
+                </label>
+
+                <input
+                  type="hidden"
+                  value=none
+                  onChange={(e) => setTargetVar(e.target.value)}
+                  placeholder="Ex: hired"
+                  className="w-full bg-background border border-content/[0.08] rounded-lg px-3 py-2.5 text-md md:text-sm text-content/80 focus:outline-none"
+                />
+              </div>
+
+              {/* PROTECTED */}
+              <div>
+                <label className="block text-lg md:text-sm font-medium text-content/50 mb-2">
+                  Protected Attribute
+                </label>
+
+                <input
+                  type="hidden"
+                  value=none
+                  onChange={(e) => setProtectedAttr(e.target.value)}
+                  placeholder="Ex: gender"
+                  className="w-full bg-background border border-content/[0.08] rounded-lg px-3 py-2.5 text-md md:text-sm text-content/80 focus:outline-none"
+                />
+              </div>
+
               {/* BUTTON */}
               <button
                 onClick={handleAnalyze}
+                disabled={
+                  analyzing || !uploaded || !targetVar || !protectedAttr
+                }
                 className="w-full inline-flex items-center justify-center gap-2 bg-cta text-cta-foreground text-lg md:text-md font-semibold px-5 py-3 rounded-xl transition-all hover:bg-cta/90 shadow-lg shadow-content/[0.05] mt-2 disabled:opacity-50"
               >
                 {analyzing ? (
