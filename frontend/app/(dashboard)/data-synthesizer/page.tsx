@@ -7,7 +7,6 @@ import {
   Columns,
   HardDrive,
   Lightbulb,
-  ArrowRight,
   Check,
   CloudUpload,
   Loader2,
@@ -26,7 +25,7 @@ export default function UploadPage() {
   const [result, setResult] = useState<any>(null);
 
   // =====================================
-  // SYNTHESIZE DATA
+  // ANALYZE
   // =====================================
   const handleAnalyze = async () => {
     if (!file) {
@@ -56,7 +55,7 @@ export default function UploadPage() {
   };
 
   // =====================================
-  // DOWNLOAD SYNTHESIZED FILE
+  // DOWNLOAD
   // =====================================
   const handleDownload = async () => {
     if (!file) return;
@@ -117,7 +116,6 @@ export default function UploadPage() {
               setDragOver(false);
 
               const dropped = e.dataTransfer.files[0];
-
               if (dropped) {
                 setFile(dropped);
                 setUploaded(true);
@@ -138,7 +136,6 @@ export default function UploadPage() {
               accept=".csv,.xlsx,.xls"
               onChange={(e) => {
                 const selected = e.target.files?.[0];
-
                 if (selected) {
                   setFile(selected);
                   setUploaded(true);
@@ -168,7 +165,7 @@ export default function UploadPage() {
               </p>
 
               {!uploaded && (
-                <button className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-content/70 bg-content/[0.06] border border-content/[0.1] px-4 py-2 rounded-lg hover:bg-content/[0.1] transition-all">
+                <button className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-content/70 bg-content/[0.06] border border-content/[0.1] px-4 py-2 rounded-lg hover:bg-content/[0.1]">
                   <UploadIcon className="w-4 h-4" />
                   Browse File
                 </button>
@@ -196,39 +193,43 @@ export default function UploadPage() {
           </button>
         </div>
 
-        {/* DATA INFO */}
+        {/* SUMMARY */}
         <div className="glass-card rounded-xl p-6">
           <h3 className="text-lg font-semibold text-content mb-1">
             Dataset Summary
           </h3>
 
           <p className="text-sm text-content/30 mb-5">
-            Automatic detection of protected + target columns
+            Auto-detected structure
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-content/[0.02] rounded-lg p-4 border border-content/[0.06]">
-              <FileText className="w-4 h-4 text-content/50 mb-2" />
-              <span className="text-xs text-content/50">Rows</span>
-              <p>{result ? result.rows : "—"}</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-content/[0.02] p-4 rounded-lg">
+              <FileText className="w-4 h-4 mb-2" />
+              <p className="text-xs">Rows</p>
+              <p>{result ? result.rowsBefore : "—"}</p>
             </div>
 
-            <div className="bg-content/[0.02] rounded-lg p-4 border border-content/[0.06]">
-              <Columns className="w-4 h-4 text-content/50 mb-2" />
-              <span className="text-xs text-content/50">Columns</span>
-              <p>{result ? result.columns : "—"}</p>
+            <div className="bg-content/[0.02] p-4 rounded-lg">
+              <Columns className="w-4 h-4 mb-2" />
+              <p className="text-xs">Columns</p>
+              <p>
+                {result?.preview
+                  ? Object.keys(result.preview[0] || {}).length
+                  : "—"}
+              </p>
             </div>
 
-            <div className="bg-content/[0.02] rounded-lg p-4 border border-content/[0.06]">
-              <HardDrive className="w-4 h-4 text-content/50 mb-2" />
-              <span className="text-xs text-content/50">Missing</span>
-              <p>{result ? result.missing : "—"}</p>
+            <div className="bg-content/[0.02] p-4 rounded-lg">
+              <HardDrive className="w-4 h-4 mb-2" />
+              <p className="text-xs">After Rows</p>
+              <p>{result ? result.rowsAfter : "—"}</p>
             </div>
 
-            <div className="bg-content/[0.02] rounded-lg p-4 border border-content/[0.06]">
-              <Lightbulb className="w-4 h-4 text-content/50 mb-2" />
-              <span className="text-xs text-content/50">Duplicates</span>
-              <p>{result ? result.duplicate : "—"}</p>
+            <div className="bg-content/[0.02] p-4 rounded-lg">
+              <Lightbulb className="w-4 h-4 mb-2" />
+              <p className="text-xs">Generated</p>
+              <p>{result ? result.generatedRows : "—"}</p>
             </div>
           </div>
         </div>
@@ -241,49 +242,88 @@ export default function UploadPage() {
             Synthesis Result
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Protected</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            <div className="p-4 bg-content/[0.02] rounded-lg">
+              <p className="text-sm">Protected</p>
               <p>{result.protected}</p>
             </div>
 
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Target</p>
+            <div className="p-4 bg-content/[0.02] rounded-lg">
+              <p className="text-sm">Target</p>
               <p>{result.target}</p>
             </div>
 
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Rows Added</p>
-              <p>{result.afterRows - result.beforeRows}</p>
+            <div className="p-4 bg-content/[0.02] rounded-lg">
+              <p className="text-sm">Rows Added</p>
+              <p>{result.generatedRows}</p>
             </div>
 
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Fairness Before</p>
-              <p>{result.fairnessBefore}%</p>
+            <div className="p-4 bg-content/[0.02] rounded-lg">
+              <p className="text-sm">Fairness Before</p>
+              <p>{result.fairnessBefore?.toFixed(2)}%</p>
             </div>
 
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Fairness After</p>
-              <p>{result.fairnessAfter}%</p>
+            <div className="p-4 bg-content/[0.02] rounded-lg">
+              <p className="text-sm">Fairness After</p>
+              <p>{result.fairnessAfter?.toFixed(2)}%</p>
             </div>
 
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Improvement</p>
-              <p>+{result.improvement}%</p>
+            <div className="p-4 bg-content/[0.02] rounded-lg">
+              <p className="text-sm">Improvement</p>
+              <p>+{result.improvement?.toFixed(2)}%</p>
+            </div>
+
+            <div className="p-4 bg-content/[0.02] rounded-lg">
+              <p className="text-sm">Bias Gap Before</p>
+              <p>{result.biasGapBefore}</p>
+            </div>
+
+            <div className="p-4 bg-content/[0.02] rounded-lg">
+              <p className="text-sm">Bias Gap After</p>
+              <p>{result.biasGapAfter}</p>
             </div>
           </div>
 
-          <p className="text-content/70 mb-5">
-            {result.recommendation}
+          <p className="mb-5">
+            Generated {result.generatedRows} synthetic rows to improve fairness.
           </p>
 
           <button
             onClick={handleDownload}
-            className="inline-flex items-center gap-2 bg-green-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-green-700"
+            className="bg-green-600 text-white px-5 py-3 rounded-xl"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4 inline mr-2" />
             Download Balanced Dataset
           </button>
+
+          {/* PREVIEW TABLE */}
+          {result.preview && (
+            <div className="mt-6 overflow-x-auto">
+              <h4 className="mb-2 font-semibold">Preview</h4>
+              <table className="min-w-full text-sm border">
+                <thead>
+                  <tr>
+                    {Object.keys(result.preview[0]).map((col) => (
+                      <th key={col} className="border px-2 py-1">
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.preview.map((row: any, i: number) => (
+                    <tr key={i}>
+                      {Object.values(row).map((val: any, j: number) => (
+                        <td key={j} className="border px-2 py-1">
+                          {val}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>
