@@ -98,7 +98,7 @@ export default function BiasDetectionPage() {
       formData.append("target", target);
       formData.append("protected", protectedCol);
 
-      const response = await fetch(`${API_URL}/bias`, {
+      const response = await fetch("http://localhost:8000/bias", {
         method: "POST",
         body: formData,
       });
