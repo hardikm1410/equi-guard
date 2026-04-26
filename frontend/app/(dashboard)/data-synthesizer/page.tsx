@@ -8,14 +8,14 @@ import {
   ArrowRight,
   HelpCircle,
   Loader2,
-  Upload,
   Check,
   CloudUpload,
-  FileText,
+  Download,
 } from "lucide-react";
 
 import AppTour from "@/components/AppTour";
 import { DATA_SYNTHESIZER_STEPS } from "@/lib/tour-steps";
+import { API_URL } from "@/lib/constants";
 
 export default function DataSynthesizerPage() {
   const [tourRun, setTourRun] = useState(false);
@@ -25,33 +25,93 @@ export default function DataSynthesizerPage() {
   const [uploaded, setUploaded] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
+  const [protectedCol, setProtectedCol] = useState("");
+  const [targetCol, setTargetCol] = useState("");
+
   const [stats, setStats] = useState<any>(null);
+  const [result, setResult] = useState<any>(null);
 
   const handleFileUpload = (selected: File) => {
     setFile(selected);
     setUploaded(true);
-
-    // Dummy preview stats
-    setStats({
-      rows: 1000,
-      columns: 12,
-      missing: 47,
-      duplicate: 19,
-    });
+    setStats(null);
+    setResult(null);
   };
 
   const handleSynthesize = async () => {
-    if (!file) {
-      alert("Upload dataset first");
+    if (!file || !protectedCol || !targetCol) {
+      alert("Upload file + enter Protected & Target column");
       return;
     }
 
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("protected", protectedCol);
+      formData.append("target", targetCol);
+
+      const response = await fetch(`${API_URL}/synthesize`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        alert(data.error);
+        setLoading(false);
+        return;
+      }
+
+      setStats({
+        rows: data.rows,
+        columns: data.columns,
+        missing: data.missing,
+        duplicate: data.duplicate,
+      });
+
+      setResult(data);
+    } catch (error) {
+      console.error(error);
+      alert("Backend connection failed");
+    } finally {
       setLoading(false);
-      alert("Synthetic Data Generated Successfully");
-    }, 2000);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!file || !protectedCol || !targetCol) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("protected", protectedCol);
+      formData.append("target", targetCol);
+
+      const response = await fetch(
+        `${API_URL}/download-synthesized`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "balanced_dataset.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (error) {
+      console.error(error);
+      alert("Download failed");
+    }
   };
 
   if (loading) {
@@ -86,7 +146,7 @@ export default function DataSynthesizerPage() {
         }
       />
 
-      {/* Upload Card */}
+      {/* Upload */}
       <div className="glass-card rounded-xl p-6 mt-6">
         <h3 className="text-lg font-semibold mb-4">
           Upload Dataset
@@ -103,7 +163,6 @@ export default function DataSynthesizerPage() {
             setDragOver(false);
 
             const dropped = e.dataTransfer.files[0];
-
             if (dropped) handleFileUpload(dropped);
           }}
           className={`border-2 border-dashed rounded-xl p-10 text-center ${
@@ -130,11 +189,39 @@ export default function DataSynthesizerPage() {
             ) : (
               <>
                 <CloudUpload className="w-10 h-10 mx-auto mb-3 text-content/50" />
-                <p>Drag CSV here or click to upload</p>
+                <p>Drag CSV here or click</p>
               </>
             )}
           </label>
         </div>
+
+        {/* Inputs */}
+        <div className="grid md:grid-cols-2 gap-4 mt-5">
+          <input
+            placeholder="Protected Column"
+            value={protectedCol}
+            onChange={(e) =>
+              setProtectedCol(e.target.value)
+            }
+            className="border rounded-lg px-4 py-3 bg-background"
+          />
+
+          <input
+            placeholder="Target Column"
+            value={targetCol}
+            onChange={(e) => setTargetCol(e.target.value)}
+            className="border rounded-lg px-4 py-3 bg-background"
+          />
+        </div>
+
+        <button
+          onClick={handleSynthesize}
+          className="mt-5 w-full bg-cta text-cta-foreground rounded-xl py-3 font-semibold flex justify-center gap-2"
+        >
+          <Database className="w-4 h-4" />
+          Synthesize Data
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Stats */}
@@ -142,17 +229,23 @@ export default function DataSynthesizerPage() {
         <div className="grid md:grid-cols-4 gap-4 mt-6">
           <div className="glass-card rounded-xl p-5">
             <p className="text-sm text-content/40">Rows</p>
-            <h3 className="text-2xl font-bold">{stats.rows}</h3>
-          </div>
-
-          <div className="glass-card rounded-xl p-5">
-            <p className="text-sm text-content/40">Columns</p>
-            <h3 className="text-2xl font-bold">{stats.columns}</h3>
+            <h3 className="text-2xl font-bold">
+              {stats.rows}
+            </h3>
           </div>
 
           <div className="glass-card rounded-xl p-5">
             <p className="text-sm text-content/40">
-              Missing Values
+              Columns
+            </p>
+            <h3 className="text-2xl font-bold">
+              {stats.columns}
+            </h3>
+          </div>
+
+          <div className="glass-card rounded-xl p-5">
+            <p className="text-sm text-content/40">
+              Missing
             </p>
             <h3 className="text-2xl font-bold">
               {stats.missing}
@@ -161,7 +254,7 @@ export default function DataSynthesizerPage() {
 
           <div className="glass-card rounded-xl p-5">
             <p className="text-sm text-content/40">
-              Duplicate Rows
+              Duplicate
             </p>
             <h3 className="text-2xl font-bold">
               {stats.duplicate}
@@ -170,29 +263,38 @@ export default function DataSynthesizerPage() {
         </div>
       )}
 
-      {/* Action */}
-      {stats && (
+      {/* Result */}
+      {result && (
         <div className="glass-card rounded-xl p-6 mt-6">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5" />
             <h3 className="text-lg font-semibold">
-              Ready to Generate Fair Data
+              Synthesis Completed
             </h3>
           </div>
 
-          <p className="text-content/50 mb-5">
-            AI will balance the dataset, reduce bias,
-            preserve relationships, and generate new
-            synthetic rows.
+          <p className="text-content/50 mb-3">
+            {result.recommendation}
+          </p>
+
+          <p className="mb-2">
+            Fairness Before: {result.fairnessBefore}%
+          </p>
+
+          <p className="mb-2">
+            Fairness After: {result.fairnessAfter}%
+          </p>
+
+          <p className="mb-5">
+            Improvement: {result.improvement}%
           </p>
 
           <button
-            onClick={handleSynthesize}
-            className="w-full bg-cta text-cta-foreground rounded-xl py-3 font-semibold flex justify-center gap-2"
+            onClick={handleDownload}
+            className="w-full bg-primary text-white rounded-xl py-3 font-semibold flex justify-center gap-2"
           >
-            <Database className="w-4 h-4" />
-            Synthesize Data
-            <ArrowRight className="w-4 h-4" />
+            <Download className="w-4 h-4" />
+            Download Balanced CSV
           </button>
         </div>
       )}
