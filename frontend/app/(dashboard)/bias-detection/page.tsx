@@ -89,59 +89,43 @@ export default function BiasDetectionPage() {
   }, [isDemo]);
 
   const handleAnalyze = async () => {
-    if (!file || !target || !protectedCol) {
-      alert("Please upload dataset and fill required fields.");
-      return;
+  if (!file || !target || !protectedCol) {
+    alert("Upload file + fill fields");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("target", target);
+    formData.append("protected", protectedCol);
+
+    const response = await fetch(`${API_URL}/bias`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const txt = await response.text();
+      throw new Error(txt);
     }
 
-    setLoading(true);
+    const result = await response.json();
 
-    try {
-      const formData = new FormData();
+    console.log(result);
 
-      formData.append("file", file);
-      formData.append("target", target);
-      formData.append("protected", protectedCol);
+    setData(result);
 
-      if (predictionFile) {
-        formData.append("prediction_file", predictionFile);
-      }
-
-      const response = await fetch(`${API_URL}/bias`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      const colors = [
-        "var(--primary)",
-        "var(--secondary-foreground)",
-        "var(--muted-foreground)",
-        "#8884d8",
-        "#82ca9d",
-      ];
-
-      const finalRates =
-        result.selectionRateData?.map(
-          (item: any, index: number) => ({
-            ...item,
-            color: colors[index % colors.length],
-          })
-        ) || [];
-
-      setData({
-        ...result,
-        selectionRateData: finalRates,
-      });
-    } catch (error) {
-      console.error(error);
-      alert("Failed to analyze.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  } catch (error: any) {
+    console.error(error);
+    alert(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
   const CustomTooltip = ({
     active,
     payload,
