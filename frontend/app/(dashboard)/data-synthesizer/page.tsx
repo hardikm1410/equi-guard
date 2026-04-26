@@ -183,7 +183,7 @@ export default function UploadPage() {
 
                 <input
                   type="hidden"
-                  value=none
+                  value={targetVar}
                   onChange={(e) => setTargetVar(e.target.value)}
                   placeholder="Ex: hired"
                   className="w-full bg-background border border-content/[0.08] rounded-lg px-3 py-2.5 text-md md:text-sm text-content/80 focus:outline-none"
@@ -198,7 +198,7 @@ export default function UploadPage() {
 
                 <input
                   type="hidden"
-                  value=none
+                  value={protectedAttr}
                   onChange={(e) => setProtectedAttr(e.target.value)}
                   placeholder="Ex: gender"
                   className="w-full bg-background border border-content/[0.08] rounded-lg px-3 py-2.5 text-md md:text-sm text-content/80 focus:outline-none"
