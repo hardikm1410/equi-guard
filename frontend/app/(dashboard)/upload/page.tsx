@@ -238,9 +238,9 @@ export default function UploadPage() {
               <div className="space-y-2 text-content/70">
                 <p>Rows: {result.before_clean.rows}</p>
                   <p>Columns: {result.before_clean.columns}</p>
-                  <p>Duplicate Rows: {result.after_clean.duplicate_rows}</p>
-                  <p>Rows With Missing Values: {result.after_clean.rows_with_missing_values}</p>
-                  <p>Total Missing Cells: {result.after_clean.total_missing_cells}</p>
+                  <p>Duplicate Rows: {result.before_clean.duplicate_rows}</p>
+                  <p>Rows With Missing Values: {result.before_clean.rows_with_missing_values}</p>
+                  <p>Total Missing Cells: {result.before_clean.total_missing_cells}</p>
               </div>
             </div>
           )}
@@ -303,8 +303,9 @@ export default function UploadPage() {
               <div className="space-y-2 text-content/70">
                 <p>Rows: {result.after_clean.rows}</p>
                 <p>Columns: {result.after_clean.columns}</p>
-                <p>Duplicates: {result.after_clean.duplicates}</p>
-                <p>Missing Values: {result.after_clean.missing_values}</p>
+                <p>Duplicate Rows: {result.after_clean.duplicate_rows}</p>
+                <p>Rows With Missing Values: {result.after_clean.rows_with_missing_values}</p>
+                <p>Total Missing Cells: {result.after_clean.total_missing_cells}</p>
               </div>
             </div>
           )}
