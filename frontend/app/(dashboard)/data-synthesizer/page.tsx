@@ -7,12 +7,14 @@ import {
   Columns,
   HardDrive,
   Lightbulb,
-  ArrowRight,
   Check,
   CloudUpload,
   Loader2,
   Download,
   Sparkles,
+  ShieldCheck,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -26,7 +28,7 @@ export default function UploadPage() {
   const [result, setResult] = useState<any>(null);
 
   // =====================================
-  // SYNTHESIZE DATA
+  // ANALYZE / SYNTHESIZE
   // =====================================
   const handleAnalyze = async () => {
     if (!file) {
@@ -56,7 +58,7 @@ export default function UploadPage() {
   };
 
   // =====================================
-  // DOWNLOAD SYNTHESIZED FILE
+  // DOWNLOAD
   // =====================================
   const handleDownload = async () => {
     if (!file) return;
@@ -78,31 +80,27 @@ export default function UploadPage() {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "balanced_dataset.csv";
-      document.body.appendChild(a);
+      a.download = "fair_dataset.csv";
       a.click();
-      a.remove();
 
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error(error);
-      alert("Download failed.");
+      alert("Download failed");
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* HEADER */}
+    <div className="max-w-7xl mx-auto">
       <PageHeader
-        title="Bias Synthesis Tool"
-        description="Upload dataset and generate balanced synthetic data."
+        title="Bias Fairness Analyzer"
+        description="Upload dataset, detect unfairness, and generate corrected fair dataset."
       />
 
       {/* TOP GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* UPLOAD */}
         <div className="glass-card rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-content mb-4">
+          <h3 className="text-lg font-semibold mb-4">
             Upload Dataset
           </h3>
 
@@ -117,7 +115,6 @@ export default function UploadPage() {
               setDragOver(false);
 
               const dropped = e.dataTransfer.files[0];
-
               if (dropped) {
                 setFile(dropped);
                 setUploaded(true);
@@ -128,17 +125,16 @@ export default function UploadPage() {
                 ? "border-primary/50 bg-content/[0.03]"
                 : uploaded
                 ? "border-content/20 bg-content/[0.02]"
-                : "border-primary/30 hover:border-primary/50 hover:bg-content/[0.02]"
+                : "border-primary/30 hover:border-primary/50"
             }`}
           >
             <input
-              type="file"
               hidden
               id="fileUpload"
+              type="file"
               accept=".csv,.xlsx,.xls"
               onChange={(e) => {
                 const selected = e.target.files?.[0];
-
                 if (selected) {
                   setFile(selected);
                   setUploaded(true);
@@ -147,11 +143,7 @@ export default function UploadPage() {
             />
 
             <label htmlFor="fileUpload" className="cursor-pointer">
-              <div
-                className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${
-                  uploaded ? "bg-content/[0.08]" : "bg-content/[0.06]"
-                }`}
-              >
+              <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center bg-content/[0.06]">
                 {uploaded ? (
                   <Check className="w-10 h-10 text-content/70" />
                 ) : (
@@ -168,7 +160,7 @@ export default function UploadPage() {
               </p>
 
               {!uploaded && (
-                <button className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-content/70 bg-content/[0.06] border border-content/[0.1] px-4 py-2 rounded-lg hover:bg-content/[0.1] transition-all">
+                <button className="mt-4 inline-flex gap-2 px-4 py-2 rounded-lg bg-content/[0.06]">
                   <UploadIcon className="w-4 h-4" />
                   Browse File
                 </button>
@@ -176,11 +168,10 @@ export default function UploadPage() {
             </label>
           </div>
 
-          {/* BUTTON */}
           <button
             onClick={handleAnalyze}
             disabled={loading || !uploaded}
-            className="w-full mt-5 inline-flex items-center justify-center gap-2 bg-cta text-cta-foreground px-5 py-3 rounded-xl font-semibold hover:bg-cta/90 disabled:opacity-50"
+            className="w-full mt-5 py-3 rounded-xl bg-cta text-cta-foreground font-semibold hover:bg-cta/90 disabled:opacity-50 inline-flex justify-center items-center gap-2"
           >
             {loading ? (
               <>
@@ -189,103 +180,167 @@ export default function UploadPage() {
               </>
             ) : (
               <>
-                Generate Balanced Dataset
+                Detect Bias & Fix
                 <Sparkles className="w-4 h-4" />
               </>
             )}
           </button>
         </div>
 
-        {/* DATA INFO */}
+        {/* DATA SUMMARY */}
         <div className="glass-card rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-content mb-1">
+          <h3 className="text-lg font-semibold mb-4">
             Dataset Summary
           </h3>
 
-          <p className="text-sm text-content/30 mb-5">
-            Automatic detection of protected + target columns
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-content/[0.02] rounded-lg p-4 border border-content/[0.06]">
-              <FileText className="w-4 h-4 text-content/50 mb-2" />
-              <span className="text-xs text-content/50">Rows</span>
-              <p>{result ? result.rows : "—"}</p>
-            </div>
-
-            <div className="bg-content/[0.02] rounded-lg p-4 border border-content/[0.06]">
-              <Columns className="w-4 h-4 text-content/50 mb-2" />
-              <span className="text-xs text-content/50">Columns</span>
-              <p>{result ? result.columns : "—"}</p>
-            </div>
-
-            <div className="bg-content/[0.02] rounded-lg p-4 border border-content/[0.06]">
-              <HardDrive className="w-4 h-4 text-content/50 mb-2" />
-              <span className="text-xs text-content/50">Missing</span>
-              <p>{result ? result.missing : "—"}</p>
-            </div>
-
-            <div className="bg-content/[0.02] rounded-lg p-4 border border-content/[0.06]">
-              <Lightbulb className="w-4 h-4 text-content/50 mb-2" />
-              <span className="text-xs text-content/50">Duplicates</span>
-              <p>{result ? result.duplicate : "—"}</p>
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Card
+              icon={<FileText className="w-4 h-4" />}
+              label="Rows"
+              value={result?.rows ?? "—"}
+            />
+            <Card
+              icon={<Columns className="w-4 h-4" />}
+              label="Columns"
+              value={result?.columns ?? "—"}
+            />
+            <Card
+              icon={<HardDrive className="w-4 h-4" />}
+              label="Missing"
+              value={result?.missing ?? "—"}
+            />
+            <Card
+              icon={<Lightbulb className="w-4 h-4" />}
+              label="Duplicates"
+              value={result?.duplicate ?? "—"}
+            />
           </div>
         </div>
       </div>
 
-      {/* RESULT */}
+      {/* FULL RESULT */}
       {result && (
-        <div className="glass-card rounded-xl p-6">
-          <h3 className="text-lg font-semibold mb-4">
-            Synthesis Result
-          </h3>
+        <div className="space-y-6">
+          {/* BIAS RESULTS */}
+          <div className="glass-card rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-4">
+              Bias Detection Result
+            </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Protected</p>
-              <p>{result.protected}</p>
-            </div>
+            <div className="grid md:grid-cols-3 gap-4">
+              <Card
+                icon={<Users className="w-4 h-4" />}
+                label="Protected Column"
+                value={result.protected}
+              />
 
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Target</p>
-              <p>{result.target}</p>
-            </div>
+              <Card
+                icon={<ShieldCheck className="w-4 h-4" />}
+                label="Target Column"
+                value={result.target}
+              />
 
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Rows Added</p>
-              <p>{result.afterRows - result.beforeRows}</p>
-            </div>
+              <Card
+                icon={<TrendingUp className="w-4 h-4" />}
+                label="Rows Added"
+                value={result.afterRows - result.beforeRows}
+              />
 
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Fairness Before</p>
-              <p>{result.fairnessBefore}%</p>
-            </div>
+              <Card
+                label="Fairness Before"
+                value={`${result.fairnessBefore}%`}
+              />
 
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Fairness After</p>
-              <p>{result.fairnessAfter}%</p>
-            </div>
+              <Card
+                label="Fairness After"
+                value={`${result.fairnessAfter}%`}
+              />
 
-            <div className="bg-content/[0.02] rounded-lg p-4">
-              <p className="text-sm text-content/40">Improvement</p>
-              <p>+{result.improvement}%</p>
+              <Card
+                label="Improvement"
+                value={`+${result.improvement}%`}
+              />
             </div>
           </div>
 
-          <p className="text-content/70 mb-5">
-            {result.recommendation}
-          </p>
+          {/* GROUP RATES */}
+          <div className="glass-card rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-4">
+              Group Selection Rates (Before Fix)
+            </h3>
 
-          <button
-            onClick={handleDownload}
-            className="inline-flex items-center gap-2 bg-green-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-green-700"
-          >
-            <Download className="w-4 h-4" />
-            Download Balanced Dataset
-          </button>
+            <div className="grid md:grid-cols-3 gap-4">
+              {Object.entries(result.groupRatesBefore).map(
+                ([key, value]: any) => (
+                  <Card
+                    key={key}
+                    label={key}
+                    value={`${(value * 100).toFixed(2)}%`}
+                  />
+                )
+              )}
+            </div>
+          </div>
+
+          <div className="glass-card rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-4">
+              Group Selection Rates (After Fix)
+            </h3>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              {Object.entries(result.groupRatesAfter).map(
+                ([key, value]: any) => (
+                  <Card
+                    key={key}
+                    label={key}
+                    value={`${(value * 100).toFixed(2)}%`}
+                  />
+                )
+              )}
+            </div>
+          </div>
+
+          {/* RECOMMENDATION */}
+          <div className="glass-card rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-3">
+              Recommendation
+            </h3>
+
+            <p className="text-content/70 mb-5">
+              {result.recommendation}
+            </p>
+
+            <button
+              onClick={handleDownload}
+              className="inline-flex items-center gap-2 bg-green-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-green-700"
+            >
+              <Download className="w-4 h-4" />
+              Download Fair Dataset
+            </button>
+          </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/* CARD */
+function Card({
+  icon,
+  label,
+  value,
+}: {
+  icon?: React.ReactNode;
+  label: string;
+  value: any;
+}) {
+  return (
+    <div className="bg-content/[0.02] border border-content/[0.06] rounded-xl p-4">
+      {icon && <div className="mb-2 text-content/50">{icon}</div>}
+      <p className="text-xs text-content/40">{label}</p>
+      <p className="text-lg font-semibold text-content/80 mt-1">
+        {value}
+      </p>
     </div>
   );
 }
