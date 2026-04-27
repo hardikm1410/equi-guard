@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from new_analysis import router as file_router
 from bias_analysis import router as bias_router
 from synthesize import router as synthesize_router
+from model_evaluation import router as model_evaluation
 
 # Load environment variables
 load_dotenv()
@@ -46,6 +47,7 @@ app.add_middleware(
 app.include_router(file_router)
 app.include_router(bias_router)
 app.include_router(synthesize_router)
+app.include_router(model_evaluation)
 
 class ResumeInput(BaseModel):
     resume_text: str
