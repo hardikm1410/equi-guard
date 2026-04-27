@@ -28,14 +28,20 @@ model = genai.GenerativeModel(
 
 
 
+from db import Base, engine
+import models
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(title="EquiGuard API")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://equiguard-cd5ed.web.app",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://equiguard-cd5ed.web.app",
         "https://equi-guard-roan.vercel.app"
     ],
     allow_credentials=True,

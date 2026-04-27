@@ -34,10 +34,17 @@ def full_clean_data(df):
 
     # Handle missing values
     for col in df.columns:
-        if df[col].dtype in ["int64", "float64"]:
+        if df[col].isnull().all():
+            continue # Skip entirely empty columns
+            
+        if pd.api.types.is_numeric_dtype(df[col]):
             df[col] = df[col].fillna(df[col].median())
         else:
-            df[col] = df[col].fillna(df[col].mode()[0])
+            mode_vals = df[col].mode()
+            if not mode_vals.empty:
+                df[col] = df[col].fillna(mode_vals[0])
+            else:
+                df[col] = df[col].fillna("unknown")
 
     # Normalize categorical
     for col in df.select_dtypes(include="object").columns:
@@ -201,6 +208,8 @@ async def synthesize(file: UploadFile = File(...)):
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
@@ -237,4 +246,6 @@ async def download(file: UploadFile = File(...)):
         )
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})

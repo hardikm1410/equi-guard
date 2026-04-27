@@ -236,19 +236,19 @@ export default function UploadPage() {
             <div className="bg-content/[0.02] border border-content/[0.06] rounded-lg p-4">
               <FileText className="w-4 h-4 text-content/50 mb-2" />
               <span className="text-xs text-content/50">Rows</span>
-              <p>{result ? result.file_info.rows : "—"}</p>
+              <p>{result?.file_info?.rows ?? "—"}</p>
             </div>
 
             <div className="bg-content/[0.02] border border-content/[0.06] rounded-lg p-4">
               <Columns className="w-4 h-4 text-content/50 mb-2" />
               <span className="text-xs text-content/50">Columns</span>
-              <p>{result ? result.file_info.columns : "—"}</p>
+              <p>{result?.file_info?.columns ?? "—"}</p>
             </div>
 
             <div className="bg-content/[0.02] border border-content/[0.06] rounded-lg p-4">
               <HardDrive className="w-4 h-4 text-content/50 mb-2" />
               <span className="text-xs text-content/50">Size</span>
-              <p>{result ? `${result.file_info.size_kb} KB` : "—"}</p>
+              <p>{result?.file_info?.size_kb ? `${result.file_info.size_kb} KB` : "—"}</p>
             </div>
 
             <div className="bg-content/[0.02] border border-content/[0.06] rounded-lg p-4 sm:col-span-3">
@@ -261,18 +261,18 @@ export default function UploadPage() {
       </div>
 
       {/* RESULT */}
-      {result && (
+      {result && !result.error && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="glass-card rounded-xl p-6">
             <h3 className="text-lg font-semibold mb-4">Before Clean</h3>
 
             <div className="space-y-2">
-              <p>Rows: {result.before_clean.rows}</p>
-              <p>Columns: {result.before_clean.columns}</p>
-              <p>Duplicate Rows: {result.before_clean.duplicate_rows}</p>
+              <p>Rows: {result.before_clean?.rows}</p>
+              <p>Columns: {result.before_clean?.columns}</p>
+              <p>Duplicate Rows: {result.before_clean?.duplicate_rows}</p>
               <p>
                 Missing Rows:{" "}
-                {result.before_clean.rows_with_missing_values}
+                {result.before_clean?.rows_with_missing_values}
               </p>
             </div>
           </div>
@@ -281,17 +281,23 @@ export default function UploadPage() {
             <h3 className="text-lg font-semibold mb-4">After Clean</h3>
 
             <div className="space-y-2">
-              <p>Rows: {result.after_clean.rows}</p>
-              <p>Columns: {result.after_clean.columns}</p>
-              <p>Duplicate Rows: {result.after_clean.duplicate_rows}</p>
+              <p>Rows: {result.after_clean?.rows}</p>
+              <p>Columns: {result.after_clean?.columns}</p>
+              <p>Duplicate Rows: {result.after_clean?.duplicate_rows}</p>
               <p>
                 Missing Rows:{" "}
-                {result.after_clean.rows_with_missing_values}
+                {result.after_clean?.rows_with_missing_values}
               </p>
             </div>
           </div>
         </div>
       )}
+      {result?.error && (
+        <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+          <strong>Error:</strong> {result.error}
+        </div>
+      )}
+
     </div>
   );
 }

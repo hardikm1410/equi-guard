@@ -283,14 +283,14 @@ export default function UploadPage() {
               <p>{result.biasGapAfter}</p>
             </div>
           </div>
-
+          
           <p className="mb-5">
             Generated {result.generatedRows} synthetic rows to improve fairness.
           </p>
 
           <button
             onClick={handleDownload}
-            className="bg-green-600 text-white px-5 py-3 rounded-xl"
+            className="bg-primary text-white px-5 py-3 rounded-xl"
           >
             <Download className="w-4 h-4 inline mr-2" />
             Download Balanced Dataset

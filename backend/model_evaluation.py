@@ -1,12 +1,10 @@
-import os
-import pandas as pd
-import io
-
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List
-
+import pandas as pd
+import io
+import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -18,15 +16,7 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 
-app = FastAPI(title="EquiGuard API")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+router = APIRouter()
 
 # ==============================
 # HELPERS
@@ -156,7 +146,7 @@ def analyze(dataset, output):
 # ==============================
 # API ENDPOINT
 # ==============================
-@app.post("/compare-model")
+@router.post("/compare-model")
 async def compare_model(
     dataset: UploadFile = File(...),
     output: UploadFile = File(...)
@@ -180,8 +170,8 @@ class ResumeInput(BaseModel):
     resume_text: str
 
 
-@app.post("/evaluate")
-def evaluate(input: ResumeInput):
+@router.post("/evaluate-resume")
+def evaluate_resume(input: ResumeInput):
     return {
         "original_score": 85,
         "shadow_score": 72,
@@ -191,6 +181,6 @@ def evaluate(input: ResumeInput):
     }
 
 
-@app.get("/")
-def root():
-    return {"status": "EquiGuard API is running"}
+@router.get("/evaluation-status")
+def evaluation_status():
+    return {"status": "Model evaluation router is active"}
