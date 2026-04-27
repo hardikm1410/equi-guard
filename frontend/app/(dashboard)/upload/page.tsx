@@ -67,7 +67,7 @@ export default function UploadPage() {
       formData.append("protected", protectedAttr);
 
 <<<<<<< HEAD
-      // If predictions are provided, we use the evaluate-model endpoint kkkla
+      // If predictions are provided, we use the evaluate-model endpoint
       // Otherwise, we use the bias detection endpoint
       const endpoint = prediction ? "/evaluate-model" : "/bias";
       
