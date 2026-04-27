@@ -40,7 +40,7 @@ export default function UploadPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("http://127.0.0.1:8000/analyze", {
+      const response = await fetch(`${API_URL}/analyze`, {
         method: "POST",
         body: formData,
       });
@@ -68,7 +68,7 @@ export default function UploadPage() {
       formData.append("file", file);
 
       const response = await fetch(
-        "http://127.0.0.1:8000/download-cleaned",
+        `${API_URL}/download-cleaned`,
         {
           method: "POST",
           body: formData,
