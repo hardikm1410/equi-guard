@@ -27,7 +27,6 @@ model = genai.GenerativeModel(
 
 
 
-
 app = FastAPI(title="EquiGuard API")
 
 app.add_middleware(
@@ -43,11 +42,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register APIs
-app.include_router(file_router) # route for the data analysis and cleaning process
-app.include_router(bias_router) # route for the detection of available bias
-app.include_router(synthesize_router) # route for the creating balanced datasset
-
 class ResumeInput(BaseModel):
     resume_text: str
 
@@ -61,9 +55,6 @@ class ChatInput(BaseModel):
 @app.get("/")
 def root():
     return {"status": "EquiGuard API is running"}
-
-
-
 
 @app.post("/evaluate")
 def evaluate(input: ResumeInput):
