@@ -13,15 +13,6 @@ from synthesize import router as synthesize_router
 from db import engine
 from models import Base
 
-# fastapi backend connection
-Base.metadata.create_all(bind=engine)
-
-
-
-# Load environment variables
-# load_dotenv()
-# fastapi connection over
-
 
 # Configure Gemini API
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -52,6 +43,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# Register APIs
+app.include_router(file_router) # route for the data analysis and cleaning process
+app.include_router(bias_router) # route for the detection of available bias
+app.include_router(synthesize_router) # route for the creating balanced datasset
+
 class ResumeInput(BaseModel):
     resume_text: str
 
@@ -66,10 +63,6 @@ class ChatInput(BaseModel):
 def root():
     return {"status": "EquiGuard API is running"}
 
-# Register APIs
-app.include_router(file_router) # route for the data analysis and cleaning process
-app.include_router(bias_router) # route for the detection of available bias
-app.include_router(synthesize_router) # route for the creating balanced datasset
 
 
 
