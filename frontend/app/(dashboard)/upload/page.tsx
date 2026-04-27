@@ -66,6 +66,7 @@ export default function UploadPage() {
       formData.append("target", targetVar);
       formData.append("protected", protectedAttr);
 
+<<<<<<< HEAD
       // If predictions are provided, we use the evaluate-model endpoint
       // Otherwise, we use the bias detection endpoint
       const endpoint = prediction ? "/evaluate-model" : "/bias";
@@ -77,6 +78,9 @@ export default function UploadPage() {
       // but it calculates correlation with target.
       
       const response = await fetch(`${API_URL}/bias`, {
+=======
+      const response = await fetch("http://localhost:8000/analyze", {
+>>>>>>> 992e7170fb964bd4580c8b63cc1310ef9d156910
         method: "POST",
         body: formData,
       });
@@ -96,6 +100,7 @@ export default function UploadPage() {
     }
   };
 
+<<<<<<< HEAD
   const aboutItems = [
     { icon: FileText, label: "Rows", value: summary.rows },
     { icon: Columns, label: "Columns", value: summary.columns },
@@ -106,6 +111,48 @@ export default function UploadPage() {
       value: "Make sure your dataset contains target and protected columns.",
     },
   ];
+=======
+  // ========================================
+  // DOWNLOAD CLEAN FILE
+  // ========================================
+  const handleDownload = async () => {
+    if (!file) return;
+
+    setDownloading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(
+        "http://localhost:8000/download-cleaned",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "cleaned_dataset.csv";
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      alert("Download failed");
+    } finally {
+      setDownloading(false);
+    }
+  };
+>>>>>>> 992e7170fb964bd4580c8b63cc1310ef9d156910
 
   return (
     <div className="max-w-5xl mx-auto">

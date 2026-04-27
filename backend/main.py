@@ -10,10 +10,14 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import google.generativeai as genai
 from dotenv import load_dotenv
+from new_analysis import router as file_router
+from bias_analysis import router as bias_router
+from synthesize import router as synthesize_router
 
 # Load environment variables
 load_dotenv()
 
+<<<<<<< HEAD
 HISTORY_FILE = os.path.join(os.path.dirname(__file__), "history.json")
 
 def save_to_history(type: str, filename: str, details: dict):
@@ -38,6 +42,8 @@ def save_to_history(type: str, filename: str, details: dict):
             json.dump(history[:100], f) # Keep last 100
     except Exception as e:
         print(f"History Save Error: {e}")
+=======
+>>>>>>> 992e7170fb964bd4580c8b63cc1310ef9d156910
 
 # Configure Gemini API
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -67,6 +73,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register APIs
+app.include_router(file_router)
+app.include_router(bias_router)
+app.include_router(synthesize_router)
 
 class ResumeInput(BaseModel):
     resume_text: str
