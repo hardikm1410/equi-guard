@@ -26,7 +26,7 @@ export default function UploadPage() {
   const [result, setResult] = useState<any>(null);
 
   // ========================================
-  // ANALYZE1
+  // ANALYZE
   // ========================================
   const handleAnalyze = async () => {
     if (!file) {
