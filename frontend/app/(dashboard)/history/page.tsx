@@ -10,8 +10,10 @@ import { HISTORY_STEPS } from "@/lib/tour-steps";
 import { useAuth } from "@/components/auth-context";
 import { DEMO_USER_EMAIL, API_URL } from "@/lib/constants";
 import { useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 
-const historyData = [
+const demoHistory = [
   { name: "Hiring_Data.csv", type: "Dataset + Model", scoreBefore: "0.72", scoreAfter: "0.24", status: "Improved", date: "11 May 2026" },
   { name: "Loan_Approval.csv", type: "Dataset", scoreBefore: "0.65", scoreAfter: "0.18", status: "Improved", date: "11 May 2026" },
   { name: "Admission_data.csv", type: "Dataset + Model", scoreBefore: "0.88", scoreAfter: "0.30", status: "Improved", date: "11 May 2026" },
@@ -31,27 +33,36 @@ export default function HistoryPage() {
 
   useEffect(() => {
     if (user) {
-      if (isDemo) {
-        setData(historyData);
-        setLoading(false);
-      } else {
-        const fetchData = async () => {
-          setLoading(true);
-          try {
-            const response = await fetch(`${API_URL}/logs`);
-            if (response.ok) {
-              const result = await response.json();
-              // result.logs is expected to be an array of objects
-              setData(result.logs || []);
-            }
-          } catch (error) {
-            console.error("Failed to fetch history:", error);
-          } finally {
-            setLoading(false);
+      const fetchData = async () => {
+        setLoading(true);
+        if (isDemo) {
+          setData(demoHistory);
+          setLoading(false);
+          return;
+        }
+
+        try {
+          if (db) {
+            const q = query(
+              collection(db, "history"),
+              where("userId", "==", user.uid),
+              orderBy("timestamp", "desc")
+            );
+            const querySnapshot = await getDocs(q);
+            const history: any[] = [];
+            querySnapshot.forEach((doc) => {
+              history.push({ id: doc.id, ...doc.data() });
+            });
+            setData(history);
           }
-        };
-        fetchData();
-      }
+        } catch (error) {
+          console.error("Failed to fetch history:", error);
+          // Fallback to empty or demo if needed, but for real users we show error or empty
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
     }
   }, [isDemo, user]);
 

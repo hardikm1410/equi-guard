@@ -14,7 +14,10 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "@/components/auth-context";
 
 export default function UploadPage() {
   const [dragOver, setDragOver] = useState(false);
@@ -23,6 +26,7 @@ export default function UploadPage() {
 
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
+  const { user } = useAuth();
 
   // =====================================
   // ANALYZE
@@ -46,6 +50,31 @@ export default function UploadPage() {
 
       const data = await response.json();
       setResult(data);
+
+      // Save to Firestore History
+      if (db && user) {
+        try {
+          await addDoc(collection(db, "history"), {
+            userId: user.uid,
+            userEmail: user.email,
+            name: file.name,
+            type: "Data Synthesis",
+            scoreBefore: (data.fairnessBefore / 100).toFixed(2),
+            scoreAfter: (data.fairnessAfter / 100).toFixed(2),
+            status: "Improved",
+            date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
+            timestamp: serverTimestamp(),
+            metrics: {
+              rowsAdded: data.generatedRows,
+              improvement: data.improvement,
+              fairnessBefore: data.fairnessBefore,
+              fairnessAfter: data.fairnessAfter
+            }
+          });
+        } catch (fsError) {
+          console.error("Firestore Error:", fsError);
+        }
+      }
     } catch (error) {
       console.error(error);
       alert("Backend connection failed");

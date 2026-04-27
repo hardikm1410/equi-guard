@@ -212,7 +212,7 @@ export default function BiasDetectionPage() {
               setUploaded(true);
             }
           }}
-          className={`border-2 border-dashed rounded-xl p-10 text-center ${
+          className={`border-2 border-dashed rounded-xl p-40 text-center ${
             dragOver ? "border-primary" : "border-content/20"
           }`}
         >

@@ -22,5 +22,13 @@ const app =
 const auth = app ? getAuth(app) : (null as any);
 const db = app ? getFirestore(app) : (null as any);
 
+// Optional: You could enable offline persistence here if needed
+// import { enableIndexedDbPersistence } from "firebase/firestore";
+// if (db) {
+//   enableIndexedDbPersistence(db).catch((err) => {
+//     console.error("Persistence failed:", err.code);
+//   });
+// }
+
 export { app, auth, db };
 
