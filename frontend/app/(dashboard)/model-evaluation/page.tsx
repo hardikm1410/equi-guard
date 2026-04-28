@@ -65,7 +65,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
       formData.append("dataset", datasetFile);
       formData.append("output", outputFile);
 
-      const response = await fetch("{API_URL}/compare-model", {
+      const response = await fetch("${API_URL}/compare-model", {
         method: "POST",
         body: formData,
       });
