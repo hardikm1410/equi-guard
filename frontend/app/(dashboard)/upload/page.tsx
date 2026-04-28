@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { PageHeader } from "@/components/page-components";
 import {
   Upload as UploadIcon,
@@ -14,7 +15,7 @@ import {
   Download,
 } from "lucide-react";
 
-import { useState } from "react";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export default function UploadPage() {
   const [dragOver, setDragOver] = useState(false);
@@ -25,9 +26,6 @@ export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
 
-  // ========================================
-  // ANALYZE
-  // ========================================
   const handleAnalyze = async () => {
     if (!file) {
       alert("Please upload file first.");
@@ -40,10 +38,14 @@ export default function UploadPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("http://localhost:8000/analyze", {
+      const response = await fetch(`${API_URL}/analyze`, {
         method: "POST",
         body: formData,
       });
+
+      if (!response.ok) {
+        throw new Error("Analyze request failed");
+      }
 
       const data = await response.json();
       setResult(data);
@@ -55,9 +57,6 @@ export default function UploadPage() {
     }
   };
 
-  // ========================================
-  // DOWNLOAD CLEAN FILE
-  // ========================================
   const handleDownload = async () => {
     if (!file) return;
 
@@ -67,13 +66,14 @@ export default function UploadPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch(
-        "http://localhost:8000/download-cleaned",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_URL}/download-cleaned`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Download request failed");
+      }
 
       const blob = await response.blob();
 
@@ -98,15 +98,12 @@ export default function UploadPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* HEADER */}
       <PageHeader
         title="Upload & Analyze"
         description="Upload your dataset and get instant analysis."
       />
 
-      {/* TOP SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* UPLOAD */}
         <div className="glass-card rounded-xl p-6">
           <h3 className="text-lg font-semibold text-content mb-4">
             Upload Dataset
@@ -127,6 +124,7 @@ export default function UploadPage() {
               if (droppedFile) {
                 setFile(droppedFile);
                 setUploaded(true);
+                setResult(null);
               }
             }}
             className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
@@ -148,6 +146,7 @@ export default function UploadPage() {
                 if (selected) {
                   setFile(selected);
                   setUploaded(true);
+                  setResult(null);
                 }
               }}
             />
@@ -174,7 +173,10 @@ export default function UploadPage() {
               </p>
 
               {!uploaded && (
-                <button className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-content/70 bg-content/[0.06] border border-content/[0.1] px-4 py-2 rounded-lg hover:bg-content/[0.1] transition-all">
+                <button
+                  type="button"
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-content/70 bg-content/[0.06] border border-content/[0.1] px-4 py-2 rounded-lg hover:bg-content/[0.1] transition-all"
+                >
                   <UploadIcon className="w-4 h-4" />
                   Browse Files
                 </button>
@@ -182,7 +184,6 @@ export default function UploadPage() {
             </label>
           </div>
 
-          {/* BUTTONS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
             <button
               onClick={handleAnalyze}
@@ -222,7 +223,6 @@ export default function UploadPage() {
           </div>
         </div>
 
-        {/* ABOUT DATA */}
         <div className="glass-card rounded-xl p-6">
           <h3 className="text-lg font-semibold text-content mb-1">
             About Your Data
@@ -248,7 +248,11 @@ export default function UploadPage() {
             <div className="bg-content/[0.02] border border-content/[0.06] rounded-lg p-4">
               <HardDrive className="w-4 h-4 text-content/50 mb-2" />
               <span className="text-xs text-content/50">Size</span>
-              <p>{result?.file_info?.size_kb ? `${result.file_info.size_kb} KB` : "—"}</p>
+              <p>
+                {result?.file_info?.size_kb
+                  ? `${result.file_info.size_kb} KB`
+                  : "—"}
+              </p>
             </div>
 
             <div className="bg-content/[0.02] border border-content/[0.06] rounded-lg p-4 sm:col-span-3">
@@ -260,7 +264,6 @@ export default function UploadPage() {
         </div>
       </div>
 
-      {/* RESULT */}
       {result && !result.error && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="glass-card rounded-xl p-6">
@@ -292,12 +295,12 @@ export default function UploadPage() {
           </div>
         </div>
       )}
+
       {result?.error && (
         <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
           <strong>Error:</strong> {result.error}
         </div>
       )}
-
     </div>
   );
 }
