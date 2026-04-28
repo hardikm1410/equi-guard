@@ -48,6 +48,8 @@ export default function ModelEvaluationPage() {
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
   const { user } = useAuth();
 
   const handleCompare = async () => {
@@ -63,7 +65,7 @@ export default function ModelEvaluationPage() {
       formData.append("dataset", datasetFile);
       formData.append("output", outputFile);
 
-      const response = await fetch("http://localhost:8000/compare-model", {
+      const response = await fetch("{API_URL}/compare-model", {
         method: "POST",
         body: formData,
       });
