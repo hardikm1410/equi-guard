@@ -100,7 +100,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
       formData.append("target", target);
       formData.append("protected", protectedCol);
 
-      const response = await fetch("${API_URL}/bias", {
+      const response = await fetch(`${API_URL}/bias`, {
         method: "POST",
         body: formData,
       });
