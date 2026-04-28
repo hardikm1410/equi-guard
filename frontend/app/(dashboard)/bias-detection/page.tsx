@@ -45,6 +45,8 @@ export default function BiasDetectionPage() {
 
   const [data, setData] = useState<any>(null);
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
   // Demo mode
   useEffect(() => {
     if (isDemo) {
@@ -98,7 +100,7 @@ export default function BiasDetectionPage() {
       formData.append("target", target);
       formData.append("protected", protectedCol);
 
-      const response = await fetch("http://localhost:8000/bias", {
+      const response = await fetch("{API_URL}/bias", {
         method: "POST",
         body: formData,
       });
