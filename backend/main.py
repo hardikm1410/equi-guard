@@ -43,7 +43,7 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "https://equiguard-cd5ed.web.app",
         "https://equi-guard-roan.vercel.app"
-        "https://equi-guard.onrender.com"
+       
     ],
     allow_credentials=True,
     allow_methods=["*"],
