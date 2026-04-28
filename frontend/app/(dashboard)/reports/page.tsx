@@ -44,6 +44,7 @@ export default function ReportsPage() {
   const [aiReportMd, setAiReportMd] = useState<string | null>(null);
   const [btnExpanded, setBtnExpanded] = useState(false);
 
+ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
   const handleGenerateAIReport = async (report: any) => {
     if (!report) return;
     setGeneratingAI(true);
